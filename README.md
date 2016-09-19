@@ -1,3 +1,12 @@
+# fastText rewritten in fsharp
+This is one to one rewrite of original fastText library to dot net
+
+* One to one rewrite (DONE)
+* Tests (TODO)
+* Scripts fix (TODO)
+* Rewrite in ideomatic fsharp style (TODO)
+* Nuget package (TODO)
+
 # fastText
 
 fastText is a library for efficient learning of word representations and sentence classification.
