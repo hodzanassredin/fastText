@@ -397,5 +397,4 @@ paket-files/
 *.bin
 *.vec
 data
-fasttext
 result
