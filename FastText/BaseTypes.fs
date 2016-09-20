@@ -61,6 +61,7 @@ module BaseTypes =
          member x.Add(v) = data.Add(v)
          member x.AddRange(v) = data.AddRange(v)
          member x.Empty() = data.Count = 0
+         member x.Copy() = String(ResizeArray<byte>(data.ToArray()))
          member x.StartsWith(sub : String) = 
             let mutable i = 0
             if sub.Array.Count > x.Array.Count 

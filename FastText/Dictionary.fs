@@ -158,11 +158,11 @@ module Dictionary =
           let word = String()
           let mutable minThreshold = 1L
           while Dictionary.readWord(inp, word) do
-            x.add(word)
+            x.add(word.Copy())
             if ntokens_ % 1000000 = 0 && args.verbose > 1
             then printf "\rRead %d M words" (ntokens_  / 1000000)
             if size_ > (MAX_VOCAB_SIZE / 4 * 3)
-            then x.threshold(minThreshold)
+            then //x.threshold(minThreshold)
                  minThreshold <- minThreshold + 1L
           printfn "\rRead %d M words" (ntokens_  / 1000000)
           x.threshold(int64(args.minCount))
@@ -174,7 +174,6 @@ module Dictionary =
           then failwith "Empty vocabulary. Try a smaller -minCount value." 
 
       member x.threshold(t : int64) =
-          printfn "threshold words len:  %d" words_.Count
           words_.Sort(fun e1 e2 -> if e1.etype <> e2.etype 
                                    then -e1.etype.CompareTo(e2.etype)
                                    else e1.count.CompareTo(e2.count))
