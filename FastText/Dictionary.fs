@@ -135,10 +135,8 @@ module Dictionary =
 //        '\f'	(0x0c)	feed (FF)
 //        '\r'	(0x0d)	carriage return (CR)
 
-      member x.isspace(c : byte) = 
+      member inline x.isspace(c : byte) = 
         c = 0x20uy || c = 0x09uy || c = 0x0auy || c = 0x0buy || c = 0x0cuy || c = 0x0duy
-
-
 
       member x.readWord(inp : BinaryReader, word : String) = 
           let c = 0uy
@@ -155,8 +153,8 @@ module Dictionary =
                              true
                         else cycle()
                     else
-                        if c = 0x0auy 
-                        then inp.MoveRel(-1L)
+                        if c = 0x0auy // \n
+                        then inp.Unget()
                         true
                  else word.Add(c)
                       cycle()

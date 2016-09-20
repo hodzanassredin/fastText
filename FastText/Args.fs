@@ -59,7 +59,7 @@ module Args =
           else if command = "cbow"
           then model_ <- model_name.cbow
           let mutable ai = 2
-          while ai < argv.Length - 2 do
+          while ai < argv.Length - 1 do
             if argv.[ai].[0] <> '-'
             then
               printfn "Provided argument without a dash! Usage:"

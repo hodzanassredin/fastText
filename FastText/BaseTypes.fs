@@ -18,7 +18,7 @@ module BaseTypes =
     type BinaryReader private (r : System.IO.BinaryReader) = 
         let len = r.BaseStream.Length
         new(stream) = new BinaryReader(new System.IO.BinaryReader(stream))
-        new(filename) = new BinaryReader(new System.IO.BinaryReader(System.IO.File.Open(filename, System.IO.FileMode.Open)))
+        new(filename) = new BinaryReader(new System.IO.BinaryReader(System.IO.File.Open(filename, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read)))
 
         member x.ReadByte() = r.ReadByte()
 
@@ -30,7 +30,7 @@ module BaseTypes =
 
         member x.MoveRel(l) = r.BaseStream.Position <- r.BaseStream.Position + l
         member x.MoveAbs(l) = r.BaseStream.Position <- l
-
+        member x.Unget() = x.MoveRel(-1L)
         member x.Length = len
         member x.Close() = r.Close()
         member x.Reader() = r
