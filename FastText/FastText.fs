@@ -329,9 +329,11 @@ module FastTextM =
 
     let main(argv : string[]) =
         try
+            let argv = Array.append [|"fastText"|] argv
+            printf "%A" argv
             if argv.Length < 2
             then printUsage();
-                 failwith "incorrect arguments"
+                 failwith ""
             let command = argv.[1]
             if command = "skipgram" || command = "cbow" || command = "supervised"
             then train(argv)
@@ -339,7 +341,7 @@ module FastTextM =
             else if command = "print-vectors" then printVectors(argv)
             else if command = "predict" || command = "predict-prob" then predict(argv)
             else printUsage()
-                 failwith "incorrect arguments"
+                 failwith ""
             0
         with ex -> eprintfn "%s" ex.Message
                    1

@@ -48,7 +48,7 @@ These were described in the two papers [1](#enriching-word-vectors-with-subword-
 In order to learn word vectors, as described in [1](#enriching-word-vectors-with-subword-information), do:
 
 ```
-$ ./fasttext skipgram -input data.txt -output model
+$ ./build/FastText.exe skipgram -input data.txt -output model
 ```
 
 where `data.txt` is a training file containing `utf-8` encoded text.
@@ -64,14 +64,14 @@ The previously trained model can be used to compute word vectors for out-of-voca
 Provided you have a text file `queries.txt` containing words for which you want to compute vectors, use the following command:
 
 ```
-$ ./fasttext print-vectors model.bin < queries.txt
+$ ./build/FastText.exe print-vectors model.bin < queries.txt
 ```
 
 This will output word vectors to the standard output, one vector per line.
 This can also be used with pipes:
 
 ```
-$ cat queries.txt | ./fasttext print-vectors model.bin
+$ cat queries.txt | ./build/FastText.exe print-vectors model.bin
 ```
 
 See the provided scripts for an example. For instance, running:
@@ -88,7 +88,7 @@ This library can also be used to train supervised text classifiers, for instance
 In order to train a text classifier using the method described in [2](#bag-of-tricks-for-efficient-text-classification), use:
 
 ```
-$ ./fasttext supervised -input train.txt -output model
+$ ./build/FastText.exe supervised -input train.txt -output model
 ```
 
 where `train.txt` is a text file containing a training sentence per line along with the labels.
@@ -97,7 +97,7 @@ This will output two files: `model.bin` and `model.vec`.
 Once the model was trained, you can evaluate it by computing the precision and recall at k (P@k and R@k) on a test set using:
 
 ```
-$ ./fasttext test model.bin test.txt k
+$ ./build/FastText.exe test model.bin test.txt k
 ```
 
 The argument `k` is optional, and is equal to `1` by default.
@@ -105,7 +105,7 @@ The argument `k` is optional, and is equal to `1` by default.
 In order to obtain the k most likely labels for a piece of text, use:
 
 ```
-$ ./fasttext predict model.bin test.txt k
+$ ./build/FastText.exe predict model.bin test.txt k
 ```
 
 where `test.txt` contains a piece of text to classify per line.
@@ -117,7 +117,7 @@ In order to reproduce results from the paper [2](#bag-of-tricks-for-efficient-te
 If you want to compute vector representations of sentences or paragraphs, please use:
 
 ```
-$ ./fasttext print-vectors model.bin < text.txt
+$ ./build/FastText.exe print-vectors model.bin < text.txt
 ```
 
 This assumes that the `text.txt` file contains the paragraphs that you want to get vectors for.
@@ -128,7 +128,7 @@ The program will output one vector representation per line in the file.
 Invoke a command without arguments to list available arguments and their default values:
 
 ```
-$ ./fasttext supervised
+$ ./build/FastText.exe supervised
 Empty input or output path.
 
 The following arguments are mandatory:
