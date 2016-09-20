@@ -17,19 +17,20 @@ module BaseTypes =
 
     type BinaryReader private (r : System.IO.BinaryReader) = 
         let len = r.BaseStream.Length
+        let mutable pos = r.BaseStream.Position
         new(stream) = new BinaryReader(new System.IO.BinaryReader(stream))
         new(filename) = new BinaryReader(new System.IO.BinaryReader(System.IO.File.Open(filename, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read)))
 
-        member x.ReadByte() = r.ReadByte()
+        member x.ReadByte() = pos <- pos + 1L
+                              r.ReadByte()
 
-        member x.EOF() = 
-            r.BaseStream.Position = len
+        member x.EOF() = pos = len
+        member x.NotEOF() = pos < len
 
-        member x.NotEOF() = 
-            r.BaseStream.Position < len
-
-        member x.MoveRel(l) = r.BaseStream.Position <- r.BaseStream.Position + l
+        member x.MoveRel(l) = r.BaseStream.Position <- pos + l
+                              pos <- pos + l
         member x.MoveAbs(l) = r.BaseStream.Position <- l
+                              pos <- l
         member x.Unget() = x.MoveRel(-1L)
         member x.Length = len
         member x.Close() = r.Close()
@@ -48,6 +49,8 @@ module BaseTypes =
         interface System.IDisposable with 
             member this.Dispose() = w.Dispose()
 
+    [<NoEquality>]
+    [<NoComparison>]
     type String private (data : ResizeArray<byte>) =
          new() = String(ResizeArray<byte>())
          new(s : string) = String(ResizeArray<byte>(System.Text.Encoding.UTF8.GetBytes(s)))
@@ -74,4 +77,16 @@ module BaseTypes =
             sum.AddRange(v.Array)
             sum.AddRange(a.Array)
             String(sum)
+
+         static member inline (==) (x : String, y : String) =
+            x.Array.Count = y.Array.Count && x.StartsWith(y)
+
+         override x.GetHashCode() = hash x.Array
+
+         interface System.IComparable with
+          member x.CompareTo yobj =
+              match yobj with
+              | :? String as y -> failwith "not implemented"
+              | _ -> invalidArg "yobj" "cannot compare values of different types"
+
 

@@ -35,8 +35,8 @@ module Dictionary =
 
       member x.find(w : String) =
           let mutable h = int(x.hash(w) % uint32(MAX_VOCAB_SIZE))
-          while word2int_.[h] <> -1 && words_.[word2int_.[h]].word <> w do
-            h <- (h + 1) % MAX_VOCAB_SIZE;
+          while word2int_.[h] <> -1 && not(words_.[word2int_.[h]].word == w) do
+            h <- (h + 1) % MAX_VOCAB_SIZE
           h
 
       member x.add(w : String) =
@@ -181,6 +181,7 @@ module Dictionary =
           then failwith "Empty vocabulary. Try a smaller -minCount value." 
 
       member x.threshold(t : int64) =
+          printfn "threshold words len:  %d" words_.Count
           words_.Sort(fun e1 e2 -> if e1.etype <> e2.etype 
                                    then -e1.etype.CompareTo(e2.etype)
                                    else e1.count.CompareTo(e2.count))
@@ -235,17 +236,17 @@ module Dictionary =
 //               inp.Seek(0L, System.IO.SeekOrigin.Begin) |> ignore//todo
           let rec cycle() = 
             if not (x.readWord(inp, token)) then ()
-            else if token = EOS then ()
+            else if token == EOS then ()
             else let wid = x.getId(token)
                  if wid < 0 then cycle()
-                 let etype = x.getType(wid)
-                 ntokens <- ntokens + 1
-                 if etype = entry_type.word &&  not (x.discard(wid, uniform.Sample()))
-                 then words.Add(wid)
-                 if etype = entry_type.label 
-                 then labels.Add(wid - nwords_)
-                 if words.Count > MAX_LINE_SIZE && args.model <> model_name.sup
-                 then ()
+                 else let etype = x.getType(wid)
+                      ntokens <- ntokens + 1
+                      if etype = entry_type.word &&  not (x.discard(wid, uniform.Sample()))
+                      then words.Add(wid)
+                      if etype = entry_type.label 
+                      then labels.Add(wid - nwords_)
+                      if words.Count > MAX_LINE_SIZE && args.model <> model_name.sup
+                      then ()
           cycle()
           ntokens
 
