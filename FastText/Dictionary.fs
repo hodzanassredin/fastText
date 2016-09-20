@@ -140,7 +140,7 @@ module Dictionary =
 
 
 
-      member x.readWord(inp : System.IO.BinaryReader, word : String) = 
+      member x.readWord(inp : BinaryReader, word : String) = 
           let c = 0uy
           word.Clear()
           let rec cycle() : bool = 
@@ -156,14 +156,14 @@ module Dictionary =
                         else cycle()
                     else
                         if c = 0x0auy 
-                        then inp.BaseStream.Seek(-1L, System.IO.SeekOrigin.Current) |> ignore
+                        then inp.MoveRel(-1L)
                         true
                  else word.Add(c)
                       cycle()
           cycle()
           
 
-      member x.readFromFile(inp : System.IO.BinaryReader) =
+      member x.readFromFile(inp : BinaryReader) =
           let word = String()
           let mutable minThreshold = 1L
           while x.readWord(inp, word) do
@@ -223,7 +223,7 @@ module Dictionary =
               h <- h * 116049371 + line.[j]
               line.Add(nwords_ + (h % int(args.bucket)))
 
-      member x.getLine(inp : System.IO.BinaryReader, 
+      member x.getLine(inp : BinaryReader, 
                        words : ResizeArray<int>,
                        labels : ResizeArray<int>,
                        rng : Mcg31m1)=

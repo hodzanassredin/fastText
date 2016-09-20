@@ -1,13 +1,11 @@
 ﻿namespace FastText
 
 module FastTextM =
-    open System.IO
     open Matrix
     open Dictionary
     open Args
     open Model
     open System.Collections.Generic
-    open System.IO
     open System.Diagnostics
     open MathNet.Numerics.Random
     open MathNet.Numerics.Distributions
@@ -31,7 +29,7 @@ module FastTextM =
           then vec.Mul(1.0 / float(ngrams.Count))
 
         member x.saveVectors() =
-          use ofs = try new StreamWriter(args_.output + ".vec") 
+          use ofs = try new System.IO.StreamWriter(args_.output + ".vec") 
                     with ex -> failwith "Error opening file for saving vectors."
           ofs.WriteLine(sprintf "%d %d" (dict_.nwords()) (args_.Dim))
           let vec = Vector(args_.Dim)
@@ -42,26 +40,26 @@ module FastTextM =
           ofs.Close()
 
         member x.saveModel() =
-          use ofs = try new BinaryWriter(File.Open(args_.output + ".bin", FileMode.Create)) 
+          use ofs = try new BinaryWriter(args_.output + ".bin") 
                     with ex -> failwith "Model file cannot be opened for saving!"
 
-          args_.save(ofs)
-          dict_.save(ofs)
-          input_.save(ofs)
-          output_.save(ofs)
+          args_.save(ofs.Writer())
+          dict_.save(ofs.Writer())
+          input_.save(ofs.Writer())
+          output_.save(ofs.Writer())
           ofs.Close()
 
         member x.loadModel(filename : string) =
-          use ifs = try new BinaryReader(File.Open(filename + ".bin", FileMode.Open)) 
+          use ifs = try new BinaryReader(filename + ".bin") 
                     with ex -> failwith "Model file cannot be opened for loading!"
           args_ <- Args()
           dict_ <- Dictionary(args_)
           input_ <- Matrix()
           output_ <- Matrix()
-          args_.load(ifs)
-          dict_.load(ifs)
-          input_.load(ifs)
-          output_.load(ifs)
+          args_.load(ifs.Reader())
+          dict_.load(ifs.Reader())
+          input_.load(ifs.Reader())
+          output_.load(ifs.Reader())
           model_ <- Model(input_, output_, args_, 0)
           if args_.model = model_name.sup
           then model_.setTargetCounts(dict_.getCounts(entry_type.label).ToArray())
@@ -117,7 +115,7 @@ module FastTextM =
           let mutable precision = 0.0
           let line = ResizeArray<int>()
           let labels = ResizeArray<int>()
-          use ifs = try new BinaryReader(File.Open(filename, FileMode.Open))
+          use ifs = try new BaseTypes.BinaryReader(filename)
                     with ex -> failwith "Test file cannot be opened!"
           
           while ifs.NotEOF() do
@@ -140,7 +138,7 @@ module FastTextM =
         member x.predict(filename : string, k : int, print_prob : bool) =
           let line = ResizeArray<int>()
           let labels = ResizeArray<int>()
-          use ifs = try new BinaryReader(File.Open(filename, FileMode.Open))
+          use ifs = try new BinaryReader(filename)
                     with ex -> failwith "Test file cannot be opened!"
           
           while ifs.NotEOF() do
@@ -193,8 +191,8 @@ module FastTextM =
           else x.wordVectors()
 
         member x.trainThread(threadId : int) =
-          use ifs = new BinaryReader(File.Open(args_.input, FileMode.Open))
-          Utils.seek(ifs, int64(threadId) * Utils.size(ifs) / int64(args_.thread)) |> ignore //todo
+          use ifs = new BinaryReader(args_.input)
+          ifs.MoveAbs(int64(threadId) * ifs.Length / int64(args_.thread)) 
 
           let model = Model(input_, output_, args_, threadId)
           if args_.model = model_name.sup
@@ -231,7 +229,7 @@ module FastTextM =
         member x.train(args : Args) =
           args_ <- args
           dict_ <- Dictionary(args_)
-          use ifs = try new BinaryReader(File.Open(args_.input, FileMode.Open))
+          use ifs = try new BinaryReader(args_.input)
                     with ex -> failwith "Input file cannot be opened!"
           
           dict_.readFromFile(ifs)

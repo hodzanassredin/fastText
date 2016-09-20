@@ -14,14 +14,39 @@ module BaseTypes =
         static member inline ShrinkToFit(this: ResizeArray<'a>) = 
             if this.Count < this.Capacity
             then this.Capacity <- this.Count
-        [<Extension>]
-        static member inline EOF(this: System.IO.BinaryReader) = 
-            this.BaseStream.Position = this.BaseStream.Length
 
-        [<Extension>]
-        static member inline NotEOF(this: System.IO.BinaryReader) = 
-            this.BaseStream.Position < this.BaseStream.Length
+    type BinaryReader private (r : System.IO.BinaryReader) = 
+        let len = r.BaseStream.Length
+        new(stream) = new BinaryReader(new System.IO.BinaryReader(stream))
+        new(filename) = new BinaryReader(new System.IO.BinaryReader(System.IO.File.Open(filename, System.IO.FileMode.Open)))
 
+        member x.ReadByte() = r.ReadByte()
+
+        member x.EOF() = 
+            r.BaseStream.Position = len
+
+        member x.NotEOF() = 
+            r.BaseStream.Position < len
+
+        member x.MoveRel(l) = r.BaseStream.Position <- r.BaseStream.Position + l
+        member x.MoveAbs(l) = r.BaseStream.Position <- l
+
+        member x.Length = len
+        member x.Close() = r.Close()
+        member x.Reader() = r
+
+        interface System.IDisposable with 
+            member this.Dispose() = r.Dispose()
+
+    type BinaryWriter(w : System.IO.BinaryWriter) =
+        new(stream) = new BinaryWriter(new System.IO.BinaryWriter(stream))
+        new(filename) = new BinaryWriter(new System.IO.BinaryWriter(System.IO.File.Open(filename, System.IO.FileMode.Create)))
+        member x.Close() = w.Close()
+
+        member x.Writer() = w
+
+        interface System.IDisposable with 
+            member this.Dispose() = w.Dispose()
 
     type String private (data : ResizeArray<byte>) =
          new() = String(ResizeArray<byte>())
@@ -37,7 +62,7 @@ module BaseTypes =
             then false
             else while i < sub.Array.Count && x.Array.[i] = sub.Array.[i] do
                     i <- i + 1
-                 i = sub.Array.Count - 1
+                 i = sub.Array.Count
          member x.Count = data.Count
          member this.Item
               with get(index) = data.[index]

@@ -30,7 +30,3 @@ module Utils =
         else let i = int((x + float(MAX_SIGMOID)) * SIGMOID_TABLE_SIZEf / MAX_SIGMOIDf / 2.)
              t_sigmoid.[i]
 
-    let size(ifs : System.IO.BinaryReader) = ifs.BaseStream.Length
-
-    let seek(ifs : System.IO.BinaryReader, pos : int64) =
-        ifs.BaseStream.Seek(pos, System.IO.SeekOrigin.Begin)
