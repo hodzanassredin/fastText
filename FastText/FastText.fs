@@ -120,7 +120,7 @@ module FastTextM =
           use ifs = try new BinaryReader(File.Open(filename, FileMode.Open))
                     with ex -> failwith "Test file cannot be opened!"
           
-          while ifs.PeekChar() <> -1 do
+          while ifs.NotEOF() do
             dict_.getLine(ifs, line, labels, model_.rng) |> ignore
             dict_.addNgrams(line, args_.wordNgrams);
             if (labels.Count > 0 && line.Count > 0) 
@@ -143,7 +143,7 @@ module FastTextM =
           use ifs = try new BinaryReader(File.Open(filename, FileMode.Open))
                     with ex -> failwith "Test file cannot be opened!"
           
-          while ifs.PeekChar() <> -1 do
+          while ifs.NotEOF() do
             dict_.getLine(ifs, line, labels, model_.rng) |> ignore // todo
             dict_.addNgrams(line, args_.wordNgrams)
             if line.Count = 0 
@@ -164,7 +164,7 @@ module FastTextM =
           let vec = Vector(args_.Dim)
           use cin = new BinaryReader(System.Console.OpenStandardInput())
           let word = String()
-          while cin.PeekChar() <> -1 do
+          while cin.NotEOF() do
             let c = cin.ReadByte()
             if c = 0uy 
             then x.getVector(vec, word)
@@ -177,7 +177,7 @@ module FastTextM =
           let labels = ResizeArray<int>()
           let vec = Vector(args_.Dim)
           use cin = new BinaryReader(System.Console.OpenStandardInput())
-          while cin.PeekChar() <> -1 do
+          while cin.NotEOF() do
             dict_.getLine(cin, line, labels, model_.rng) |> ignore//todo
             dict_.addNgrams(line, args_.wordNgrams)
             vec.Zero()
@@ -330,7 +330,7 @@ module FastTextM =
     let main(argv : string[]) =
         try
             let argv = Array.append [|"fastText"|] argv
-            printf "%A" argv
+//            printf "%A" argv
             if argv.Length < 2
             then printUsage();
                  failwith ""

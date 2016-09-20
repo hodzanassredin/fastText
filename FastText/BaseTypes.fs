@@ -4,7 +4,7 @@ module BaseTypes =
     open System.Runtime.CompilerServices
 
     [<Extension>]
-    type ResizeArrExts() =
+    type Exts() =
         [<Extension>]
         static member inline Resize(this: ResizeArray<'a>, size : int) = 
             if this.Count > size
@@ -14,12 +14,20 @@ module BaseTypes =
         static member inline ShrinkToFit(this: ResizeArray<'a>) = 
             if this.Count < this.Capacity
             then this.Capacity <- this.Count
+        [<Extension>]
+        static member inline EOF(this: System.IO.BinaryReader) = 
+            this.BaseStream.Position = this.BaseStream.Length
+
+        [<Extension>]
+        static member inline NotEOF(this: System.IO.BinaryReader) = 
+            this.BaseStream.Position < this.BaseStream.Length
+
 
     type String private (data : ResizeArray<byte>) =
          new() = String(ResizeArray<byte>())
          new(s : string) = String(ResizeArray<byte>(System.Text.Encoding.UTF8.GetBytes(s)))
          member x.Array = data
-         member x.Clear() = data.RemoveRange(0, data.Count - 1)
+         member x.Clear() = data.RemoveRange(0, data.Count)
          member x.Add(v) = data.Add(v)
          member x.AddRange(v) = data.AddRange(v)
          member x.Empty() = data.Count = 0
@@ -27,7 +35,7 @@ module BaseTypes =
             let mutable i = 0
             if sub.Array.Count > x.Array.Count 
             then false
-            else while x.Array.[i] = sub.Array.[i] && i < sub.Array.Count do
+            else while i < sub.Array.Count && x.Array.[i] = sub.Array.[i] do
                     i <- i + 1
                  i = sub.Array.Count - 1
          member x.Count = data.Count

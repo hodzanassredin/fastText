@@ -31,13 +31,10 @@ module Dictionary =
       let mutable ntokens_ = 0
       let words_ = ResizeArray<Entry>()
       let pdiscard_ = ResizeArray<float>()
-      let word2int_ = ResizeArray<int>(MAX_VOCAB_SIZE)
-      do
-          for i = 0 to MAX_VOCAB_SIZE - 1 do
-            word2int_.[i] <- -1
+      let word2int_ = ResizeArray<int>(Array.create MAX_VOCAB_SIZE -1)
 
       member x.find(w : String) =
-          let mutable h = hash(w) % MAX_VOCAB_SIZE
+          let mutable h = int(x.hash(w) % uint32(MAX_VOCAB_SIZE))
           while word2int_.[h] <> -1 && words_.[word2int_.[h]].word <> w do
             h <- (h + 1) % MAX_VOCAB_SIZE;
           h
@@ -97,7 +94,7 @@ module Dictionary =
           assert(id < size_)
           words_.[id].word
 
-      member x.hash(str : String) =
+      member x.hash(str : String) : uint32 =
           let mutable h = 2166136261u
           for i = 0 to str.Count - 1 do
             h <- h ^^^ uint32(str.[i])
@@ -146,10 +143,8 @@ module Dictionary =
       member x.readWord(inp : System.IO.BinaryReader, word : String) = 
           let c = 0uy
           word.Clear()
-          let EOF = -1
           let rec cycle() : bool = 
-            let c = inp.ReadByte()
-            if inp.PeekChar() = EOF then not <| word.Empty()
+            if inp.EOF() then not <| word.Empty()
             else let c = inp.ReadByte()
                  if x.isspace(c) || c = 0uy 
                  then
