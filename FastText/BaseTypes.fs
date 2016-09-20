@@ -2,7 +2,7 @@
 [<AutoOpen>]
 module BaseTypes = 
     open System.Runtime.CompilerServices
-
+    open System.IO
     [<Extension>]
     type Exts() =
         [<Extension>]
@@ -19,7 +19,9 @@ module BaseTypes =
         let len = r.BaseStream.Length
         let mutable pos = r.BaseStream.Position
         new(stream) = new BinaryReader(new System.IO.BinaryReader(stream))
-        new(filename) = new BinaryReader(new System.IO.BinaryReader(System.IO.File.Open(filename, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read)))
+        new(filename) = let stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read, 10000, FileOptions.SequentialScan)
+//                        let stream = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read)
+                        new BinaryReader(new System.IO.BinaryReader(stream))
 
         member x.ReadByte() = pos <- pos + 1L
                               r.ReadByte()
@@ -80,6 +82,13 @@ module BaseTypes =
 
          static member inline (==) (x : String, y : String) =
             x.Array.Count = y.Array.Count && x.StartsWith(y)
+
+         member str.hash() : uint32 =
+          let mutable h = 2166136261u
+          for i = 0 to str.Count - 1 do
+            h <- h ^^^ uint32(str.[i])
+            h <- h * 16777619u
+          h
 
          override x.GetHashCode() = hash x.Array
 

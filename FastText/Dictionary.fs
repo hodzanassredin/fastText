@@ -34,7 +34,7 @@ module Dictionary =
       let word2int_ = ResizeArray<int>(Array.create MAX_VOCAB_SIZE -1)
 
       member x.find(w : String) =
-          let mutable h = int(x.hash(w) % uint32(MAX_VOCAB_SIZE))
+          let mutable h = int(w.hash() % uint32(MAX_VOCAB_SIZE))
           while word2int_.[h] <> -1 && not(words_.[word2int_.[h]].word == w) do
             h <- (h + 1) % MAX_VOCAB_SIZE
           h
@@ -94,13 +94,6 @@ module Dictionary =
           assert(id < size_)
           words_.[id].word
 
-      member x.hash(str : String) : uint32 =
-          let mutable h = 2166136261u
-          for i = 0 to str.Count - 1 do
-            h <- h ^^^ uint32(str.[i])
-            h <- h * 16777619u
-          h
-
       member x.GetStrChar(word : string, i) = uint32(word.[i])
 
 
@@ -118,7 +111,7 @@ module Dictionary =
                     ngram.Add(word.[j])
                     j <- j + 1
                   if n >= args.minn
-                  then let h = int(x.hash(ngram)) % args.bucket //todo
+                  then let h = int(ngram.hash()) % args.bucket //todo
                        ngrams.Add(nwords_ + int(h))
                   n <- n + 1
 
@@ -135,36 +128,36 @@ module Dictionary =
 //        '\f'	(0x0c)	feed (FF)
 //        '\r'	(0x0d)	carriage return (CR)
 
-      member inline x.isspace(c : byte) = 
+      static member isspace(c : byte) = 
         c = 0x20uy || c = 0x09uy || c = 0x0auy || c = 0x0buy || c = 0x0cuy || c = 0x0duy
 
-      member x.readWord(inp : BinaryReader, word : String) = 
-          let c = 0uy
+      static member readWordInt(inp : BinaryReader, word : String) = 
+            let c = inp.ReadByte()
+            if Dictionary.isspace(c) || c = 0uy 
+            then
+                if word.Empty() 
+                then
+                    if c = 0x0auy // \n
+                    then word.AddRange(EOS.Array)
+                         true
+                    else Dictionary.readWordInt(inp, word)
+                else
+                    if c = 0x0auy // \n
+                    then inp.Unget()
+                    true
+            else word.Add(c)
+                 Dictionary.readWordInt(inp, word)
+
+      static member inline readWord(inp : BinaryReader, word : String) = 
           word.Clear()
-          let rec cycle() : bool = 
-            if inp.EOF() then not <| word.Empty()
-            else let c = inp.ReadByte()
-                 if x.isspace(c) || c = 0uy 
-                 then
-                    if word.Empty() 
-                    then
-                        if c = 0x0auy // \n
-                        then word.AddRange(EOS.Array)
-                             true
-                        else cycle()
-                    else
-                        if c = 0x0auy // \n
-                        then inp.Unget()
-                        true
-                 else word.Add(c)
-                      cycle()
-          cycle()
+          try Dictionary.readWordInt(inp, word)
+          with | :? System.IO.EndOfStreamException -> not <| word.Empty()
           
 
       member x.readFromFile(inp : BinaryReader) =
           let word = String()
           let mutable minThreshold = 1L
-          while x.readWord(inp, word) do
+          while Dictionary.readWord(inp, word) do
             x.add(word)
             if ntokens_ % 1000000 = 0 && args.verbose > 1
             then printf "\rRead %d M words" (ntokens_  / 1000000)
@@ -222,33 +215,38 @@ module Dictionary =
               h <- h * 116049371 + line.[j]
               line.Add(nwords_ + (h % int(args.bucket)))
 
+      member x.cycle(uniform : ContinuousUniform,
+                     inp : BinaryReader, 
+                     words : ResizeArray<int>,
+                     labels : ResizeArray<int>,
+                     token : String, 
+                     ntokens :int) = 
+            if not (Dictionary.readWord(inp, token)) then ntokens
+            else if token == EOS then ntokens
+            else let wid = x.getId(token)
+                 if wid < 0 then x.cycle(uniform, inp, words, labels, token, ntokens)
+                 else let etype = x.getType(wid)
+                      if etype = entry_type.word &&  not (x.discard(wid, uniform.Sample()))
+                      then words.Add(wid)
+                      if etype = entry_type.label 
+                      then labels.Add(wid - nwords_)
+                      if words.Count > MAX_LINE_SIZE && args.model <> model_name.sup
+                      then ntokens + 1
+                      else x.cycle(uniform, inp, words, labels, token, ntokens + 1)
+
       member x.getLine(inp : BinaryReader, 
                        words : ResizeArray<int>,
                        labels : ResizeArray<int>,
                        rng : Mcg31m1)=
           let uniform = ContinuousUniform(0., 1., rng)
           let token = String()
-          let mutable ntokens = 0
           words.Clear()
           labels.Clear()
 //          if inp.eof() 
 //          then // todo check inp.clear()
 //               inp.Seek(0L, System.IO.SeekOrigin.Begin) |> ignore//todo
-          let rec cycle() = 
-            if not (x.readWord(inp, token)) then ()
-            else if token == EOS then ()
-            else let wid = x.getId(token)
-                 if wid < 0 then cycle()
-                 else let etype = x.getType(wid)
-                      ntokens <- ntokens + 1
-                      if etype = entry_type.word &&  not (x.discard(wid, uniform.Sample()))
-                      then words.Add(wid)
-                      if etype = entry_type.label 
-                      then labels.Add(wid - nwords_)
-                      if words.Count > MAX_LINE_SIZE && args.model <> model_name.sup
-                      then ()
-          cycle()
-          ntokens
+
+          x.cycle(uniform, inp, words, labels, token, 0)
 
       member x.getLabel(lid : int) =
           assert(lid >= 0)
