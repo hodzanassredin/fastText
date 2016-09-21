@@ -26,11 +26,15 @@ module BaseTypes =
         new(filename) = let stream = System.IO.File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read)
                         new BinaryReader(stream)
 
-        member x.ReadByte() = if pos = len 
+        member x.ReadByte() = if pos >= len 
                               then raise <| System.IO.EndOfStreamException()
                               let i = int(pos - buff_pos)
-                              if i < buff_size then pos <- pos + 1L
-                                                    buff.[i]
+                              if i < 0 //unget handle
+                              then pos <- 0L
+                                   0x0auy // \n
+                              elif i < buff_size 
+                              then pos <- pos + 1L
+                                   buff.[i]
                               else s.Read(buff, 0, buff_size) |>ignore
                                    buff_pos <- pos
                                    pos <- pos + 1L
@@ -38,13 +42,14 @@ module BaseTypes =
 
         member x.EOF() = pos >= len
         member x.NotEOF() = pos < len
-        member x.MoveAbs(l) = s.Position <- l
-                              pos <- l
-                              buff_pos <- l
-                              s.Read(buff, 0, buff_size) |>ignore
+        member x.MoveAbs(l) = if l >= buff_pos && l < (buff_pos + int64(buff_size))
+                              then pos <- l
+                              else s.Position <- l
+                                   pos <- l
+                                   buff_pos <- l
+                                   s.Read(buff, 0, buff_size) |>ignore
 
-        member x.Unget() = assert (pos - buff_pos > 0L) 
-                           pos <- pos - 1L
+        member x.Unget() = pos <- pos - 1L
                            
         member x.Length = len
         member x.Close() = s.Close()
