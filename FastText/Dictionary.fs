@@ -270,10 +270,10 @@ module Dictionary =
           words_.Clear()
           for i = 0 to MAX_VOCAB_SIZE - 1 do
             word2int_.[i] <- -1
-          let size_ = inp.ReadInt32()
-          let nwords_ = inp.ReadInt32()
-          let nlabels_ = inp.ReadInt32()
-          let ntokens_ = inp.ReadInt32()
+          size_ <- inp.ReadInt32()
+          nwords_ <- inp.ReadInt32()
+          nlabels_ <- inp.ReadInt32()
+          ntokens_ <- inp.ReadInt32()
           for i = 0 to size_ - 1 do
             let word = String()
             let mutable c = inp.ReadByte()

@@ -53,20 +53,15 @@ module BaseTypes =
                            
         member x.Length = len
         member x.Close() = s.Close()
-        member x.Reader() = new System.IO.BinaryReader(s)
 
         interface System.IDisposable with 
             member this.Dispose() = s.Dispose()
 
-    type BinaryWriter(w : System.IO.BinaryWriter) =
-        new(stream) = new BinaryWriter(new System.IO.BinaryWriter(stream))
-        new(filename) = new BinaryWriter(new System.IO.BinaryWriter(System.IO.File.Open(filename, System.IO.FileMode.Create)))
-        member x.Close() = w.Close()
+    let binaryWriter(filename) = new System.IO.BinaryWriter(System.IO.File.Open(filename, System.IO.FileMode.Create))
+    let binaryReader(filename) = 
+            let s = System.IO.File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read)
+            new System.IO.BinaryReader(s)
 
-        member x.Writer() = w
-
-        interface System.IDisposable with 
-            member this.Dispose() = w.Dispose()
 [<AutoOpen>]
 module ByteString =
 

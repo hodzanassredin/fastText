@@ -10,8 +10,8 @@ module FastTextM =
     open MathNet.Numerics.Random
     open MathNet.Numerics.Distributions
     open System.Threading
-    type FastText() =  
-        let mutable args_ = Args()
+    type FastText(a : Args) =  
+        let mutable args_ = a
         let mutable dict_ = Dictionary(args_)
         let mutable input_ = Matrix()
         let mutable output_ = Matrix()
@@ -19,7 +19,7 @@ module FastTextM =
         let mutable tokenCount = 0L //atomic todo
         let mutable start = Stopwatch.StartNew() // todo clock_t
         let EXIT_FAILURE  = 1
-
+        new() = FastText(Args())
         member x.getVector(vec : Vector, word : String) =
           let ngrams = dict_.getNgrams(word)
           vec.Zero()
@@ -39,27 +39,26 @@ module FastTextM =
             ofs.WriteLine(sprintf "%s %A" (word.ToString()) vec)
           ofs.Close()
 
-        member x.saveModel() =
-          use ofs = try new BinaryWriter(args_.output + ".bin") 
+        member x.saveModel(filename) =
+          use ofs = try binaryWriter(filename) 
                     with ex -> failwith "Model file cannot be opened for saving!"
-
-          args_.save(ofs.Writer())
-          dict_.save(ofs.Writer())
-          input_.save(ofs.Writer())
-          output_.save(ofs.Writer())
+          args_.save(ofs)
+          dict_.save(ofs)
+          input_.save(ofs)
+          output_.save(ofs)
           ofs.Close()
 
         member x.loadModel(filename : string) =
-          use ifs = try new BinaryReader(filename + ".bin") 
+          use ifs = try binaryReader(filename) 
                     with ex -> failwith "Model file cannot be opened for loading!"
           args_ <- Args()
           dict_ <- Dictionary(args_)
           input_ <- Matrix()
           output_ <- Matrix()
-          args_.load(ifs.Reader())
-          dict_.load(ifs.Reader())
-          input_.load(ifs.Reader())
-          output_.load(ifs.Reader())
+          args_.load(ifs)
+          dict_.load(ifs)
+          input_.load(ifs)
+          output_.load(ifs)
           model_ <- Model(input_, output_, args_, 0)
           if args_.model = model_name.sup
           then model_.setTargetCounts(dict_.getCounts(entry_type.label).ToArray())
@@ -249,7 +248,7 @@ module FastTextM =
             it.Join()
           model_ <- Model(input_, output_, args_, 0)
 
-          x.saveModel()
+          x.saveModel(args_.output + ".bin")
           if args_.model <> model_name.sup 
           then x.saveVectors()
 

@@ -24,7 +24,8 @@
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>$(Platform)</PlatformTarget>
     <DocumentationFile>bin\$(Configuration)\$(AssemblyName).XML</DocumentationFile>
-    <StartArguments>supervised -input "..\..\..\data\dbpedia.train" -output "..\..\..\result\dbpedia" -dim 10 -lr 0.1 -wordNgrams 2 -minCount 1 -bucket 10000000 -epoch 5 -thread 4</StartArguments>
+    <StartArguments>supervised -input "..\..\..\data\dbpedia.train" -output "..\..\..\result\dbpedia" -dim 10 -lr 0.1 -wordNgrams 2 -minCount 1 -bucket 10000000 -epoch 5 -thread 4
+</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -35,7 +36,8 @@
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>$(Platform)</PlatformTarget>
     <DocumentationFile>bin\$(Configuration)\$(AssemblyName).XML</DocumentationFile>
-    <StartArguments>supervised -input "..\..\..\data\dbpedia.train" -output "..\..\..\result\dbpedia" -dim 10 -lr 0.1 -wordNgrams 2 -minCount 1 -bucket 10000000 -epoch 5 -thread 4</StartArguments>
+    <StartArguments>supervised -input "..\..\..\data\dbpedia.train" -output "..\..\..\result\dbpedia" -dim 10 -lr 0.1 -wordNgrams 2 -minCount 1 -bucket 10000000 -epoch 5 -thread 4
+</StartArguments>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -67,7 +69,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\$(Configuration)\$(AssemblyName).XML</DocumentationFile>
-    <StartArguments>supervised -input "..\..\..\data\dbpedia.train" -output "..\..\..\result\dbpedia" -dim 10 -lr 0.1 -wordNgrams 2 -minCount 1 -bucket 10000000 -epoch 5 -thread 4</StartArguments>
+    <StartArguments>test "d:\ft\result\dbpedia.bin" "d:\ft\data\dbpedia.test"</StartArguments>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
@@ -79,7 +81,8 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\$(Configuration)\$(AssemblyName).XML</DocumentationFile>
     <PlatformTarget>x64</PlatformTarget>
-    <StartArguments>supervised -input "..\..\..\data\dbpedia.train" -output "..\..\..\result\dbpedia" -dim 10 -lr 0.1 -wordNgrams 2 -minCount 1 -bucket 10000000 -epoch 5 -thread 4</StartArguments>
+    <StartArguments>supervised -input "..\..\..\data\dbpedia.train" -output "..\..\..\result\dbpedia" -dim 10 -lr 0.1 -wordNgrams 2 -minCount 1 -bucket 10000000 -epoch 5 -thread 4
+</StartArguments>
   </PropertyGroup>
   <Choose>
     <When Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets')">

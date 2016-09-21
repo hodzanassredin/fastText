@@ -99,5 +99,5 @@ module Matrix =
           m <- int(inp.ReadInt64())
           n <- int(inp.ReadInt64())
           data_ <- Array.zeroCreate (m * n)
-          for i = 0 to m * n do
+          for i = 0 to m * n - 1 do
                data_.[i] <- inp.ReadDouble()
