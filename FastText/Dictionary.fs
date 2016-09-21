@@ -75,7 +75,7 @@ module Dictionary =
 
       member x.discard(id : int, rand : float) =
           assert(id >= 0)
-          assert(id < nwords_)
+          //assert(id < nwords_) //this is incorrect in source cpp needs to be size check thresold fn
           if args.model = model_name.sup 
           then false
           else rand > pdiscard_.[id]
@@ -162,7 +162,7 @@ module Dictionary =
             if ntokens_ % 1000000 = 0 && args.verbose > 1
             then printf "\rRead %d M words" (ntokens_  / 1000000)
             if size_ > (MAX_VOCAB_SIZE / 4 * 3)
-            then //x.threshold(minThreshold)
+            then x.threshold(minThreshold)
                  minThreshold <- minThreshold + 1L
           printfn "\rRead %d M words" (ntokens_  / 1000000)
           x.threshold(int64(args.minCount))
@@ -175,8 +175,8 @@ module Dictionary =
 
       member x.threshold(t : int64) =
           words_.Sort(fun e1 e2 -> if e1.etype <> e2.etype 
-                                   then -e1.etype.CompareTo(e2.etype)
-                                   else e1.count.CompareTo(e2.count))
+                                   then e1.etype.CompareTo(e2.etype)
+                                   else -e1.count.CompareTo(e2.count))
           words_.RemoveAll(fun e -> e.etype = entry_type.word && e.count < t) |> ignore
 
           words_.ShrinkToFit()
@@ -209,10 +209,10 @@ module Dictionary =
       member x.addNgrams(line : ResizeArray<int>, n : int) =
           let line_size = line.Count
           for i = 0 to line_size - 1 do
-            let mutable h = line.[i]
+            let mutable h = uint64(line.[i])
             for j = i + 1 to min (line_size - 1) (i + n) do
-              h <- h * 116049371 + line.[j]
-              line.Add(nwords_ + (h % int(args.bucket)))
+              h <- h * 116049371uL + uint64(line.[j])
+              line.Add(nwords_ + int(h % uint64(args.bucket)))
 
       member x.cycle(uniform : ContinuousUniform,
                      inp : BinaryReader, 
@@ -225,10 +225,12 @@ module Dictionary =
             else let wid = x.getId(token)
                  if wid < 0 then x.cycle(uniform, inp, words, labels, token, ntokens)
                  else let etype = x.getType(wid)
-                      if etype = entry_type.word &&  not (x.discard(wid, uniform.Sample()))
-                      then words.Add(wid)
+                      if etype = entry_type.word && not (x.discard(wid, uniform.Sample()))
+                      then 
+                            words.Add(wid)
                       if etype = entry_type.label 
-                      then labels.Add(wid - nwords_)
+                      then 
+                        labels.Add(wid - nwords_)
                       if words.Count > MAX_LINE_SIZE && args.model <> model_name.sup
                       then ntokens + 1
                       else x.cycle(uniform, inp, words, labels, token, ntokens + 1)
