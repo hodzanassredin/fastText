@@ -2,6 +2,7 @@
 This is one to one rewrite of original fastText library to dot net
 
 * One to one rewrite (DONE)
+* Correct results and bug fixing (IN PROGRESS)
 * Tests (TODO)
 * Scripts fix (TODO)
 * Rewrite in ideomatic fsharp style (TODO)
