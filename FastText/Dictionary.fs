@@ -19,9 +19,9 @@ module Dictionary =
                 {word = word; count = count; etype = etype; subwords = subwords; binary = binary}
        end
 
-    let EOS = String("</s>")
-    let BOW = String("<")
-    let EOW = String(">")
+    let EOS = ByteString.fromString("</s>")
+    let BOW = ByteString.fromString("<")
+    let EOW = ByteString.fromString(">")
     let MAX_VOCAB_SIZE = 30000000
     let MAX_LINE_SIZE = 1024
     type Dictionary(args : Args) =
@@ -34,8 +34,8 @@ module Dictionary =
       let word2int_ = ResizeArray<int>(Array.create MAX_VOCAB_SIZE -1)
 
       member x.find(w : String) =
-          let mutable h = int(w.hash() % uint32(MAX_VOCAB_SIZE))
-          while word2int_.[h] <> -1 && not(words_.[word2int_.[h]].word == w) do
+          let mutable h = int(w.Hash() % uint32(MAX_VOCAB_SIZE))
+          while word2int_.[h] <> -1 && not(words_.[word2int_.[h]].word.Eq w) do
             h <- (h + 1) % MAX_VOCAB_SIZE
           h
 
@@ -70,7 +70,7 @@ module Dictionary =
           let mutable ngrams = ResizeArray<int>()
           let i = x.getId(word)
           if i >= 0 then ngrams <- words_.[i].subwords
-          else x.computeNgrams(BOW + word + EOW, ngrams)
+          else x.computeNgrams(word.Wrap(BOW,EOW), ngrams)
           ngrams
 
       member x.discard(id : int, rand : float) =
@@ -111,13 +111,13 @@ module Dictionary =
                     ngram.Add(word.[j])
                     j <- j + 1
                   if n >= args.minn
-                  then let h = int(ngram.hash()) % args.bucket //todo
+                  then let h = int(ngram.Hash()) % args.bucket //todo
                        ngrams.Add(nwords_ + int(h))
                   n <- n + 1
 
       member x.initNgrams() =
           for i = 0 to size_ - 1 do
-            let word = BOW + words_.[i].word + EOW;
+            let word = words_.[i].word.Wrap(BOW,EOW)
             words_.[i].subwords.Add(i);
             x.computeNgrams(word, words_.[i].subwords)
 
@@ -133,15 +133,15 @@ module Dictionary =
 
       static member readWordInt(inp : BinaryReader, word : String) = 
             if inp.EOF() 
-            then not <| word.Empty()
+            then word.Count > 0
             else
                 let c = inp.ReadByte()
                 if Dictionary.isspace(c) || c = 0uy 
                 then
-                    if word.Empty() 
+                    if word.Count = 0
                     then
                         if c = 0x0auy // \n
-                        then word.AddRange(EOS.Array)
+                        then word.AddRange(EOS)
                              true
                         else Dictionary.readWordInt(inp, word)
                     else
@@ -222,7 +222,7 @@ module Dictionary =
                      token : String, 
                      ntokens :int) = 
             if not (Dictionary.readWord(inp, token)) then ntokens
-            else if token == EOS then ntokens
+            else if token.Eq EOS then ntokens
             else let wid = x.getId(token)
                  if wid < 0 then x.cycle(uniform, inp, words, labels, token, ntokens)
                  else let etype = x.getType(wid)
@@ -244,9 +244,8 @@ module Dictionary =
           let token = String()
           words.Clear()
           labels.Clear()
-//          if inp.eof() 
-//          then // todo check inp.clear()
-//               inp.Seek(0L, System.IO.SeekOrigin.Begin) |> ignore//todo
+          if inp.EOF() 
+          then inp.MoveAbs(0L) 
 
           x.cycle(uniform, inp, words, labels, token, 0)
 
@@ -262,7 +261,7 @@ module Dictionary =
           out.Write(ntokens_)
           for i = 0 to size_ - 1 do
             let e = words_.[i]
-            out.Write(e.word.Array.ToArray())
+            out.Write(e.word.ToArray())
             out.Write(0uy)
             out.Write(e.count)
             out.Write(byte(e.etype))

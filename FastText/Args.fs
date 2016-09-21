@@ -18,7 +18,7 @@ module Args =
         let mutable thread_ = 12
         let mutable lrUpdateRate_ = 100
         let mutable t_ = 1e-4
-        let mutable label_ = String("__label__")
+        let mutable label_ = ByteString.fromString("__label__")
         let mutable verbose_ = 2
 
         let mutable output_ = ""
@@ -115,7 +115,7 @@ module Args =
             else if argv.[ai] = "-t"
             then t_ <- float(argv.[ai + 1])
             else if argv.[ai] = "-label"
-            then label_ <- String(argv.[ai + 1])
+            then label_ <- ByteString.fromString(argv.[ai + 1])
             else if argv.[ai] = "-verbose"
             then verbose_ <- int(argv.[ai + 1])
             else 

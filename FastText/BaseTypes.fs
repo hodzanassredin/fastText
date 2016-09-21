@@ -62,53 +62,53 @@ module BaseTypes =
 
         interface System.IDisposable with 
             member this.Dispose() = w.Dispose()
+[<AutoOpen>]
+module ByteString =
 
-    [<NoEquality>]
-    [<NoComparison>]
-    type String private (data : ResizeArray<byte>) =
-         new() = String(ResizeArray<byte>())
-         new(s : string) = String(ResizeArray<byte>(System.Text.Encoding.UTF8.GetBytes(s)))
-         member x.Array = data
-         member x.Clear() = data.RemoveRange(0, data.Count)
-         member x.Add(v) = data.Add(v)
-         member x.AddRange(v) = data.AddRange(v)
-         member x.Empty() = data.Count = 0
-         member x.Copy() = String(ResizeArray<byte>(data.ToArray()))
-         member x.StartsWith(sub : String) = 
+    type String = ResizeArray<byte>
+    open System.Runtime.CompilerServices
+    let fromString(s : string) = String(System.Text.Encoding.UTF8.GetBytes(s))
+    
+    [<Extension>]
+    type ArrayExts () =
+        [<Extension>]
+        static member inline Clear(this : String) = this.RemoveRange(0, this.Count)
+        [<Extension>]
+        static member inline Copy(this : String) = ResizeArray<byte>(this.ToArray())
+        [<Extension>]
+        static member inline StartsWith(this : String, sub : String) = 
             let mutable i = 0
-            if sub.Array.Count > x.Array.Count 
+            if sub.Count > this.Count 
             then false
-            else while i < sub.Array.Count && x.Array.[i] = sub.Array.[i] do
+            else while i < sub.Count && this.[i] = sub.[i] do
                     i <- i + 1
-                 i = sub.Array.Count
-         member x.Count = data.Count
-         member this.Item
-              with get(index) = data.[index]
-              and set index value = data.[index] <- value
+                 i = sub.Count
 
-         override x.ToString() = System.Text.Encoding.UTF8.GetString(data.ToArray())
-         static member (+) (v : String, a : String) =
-            let sum = ResizeArray<byte>(v.Array.Count + a.Array.Count)
-            sum.AddRange(v.Array)
-            sum.AddRange(a.Array)
-            String(sum)
+        [<Extension>]
+        static member inline ToStr(this : String) = 
+            System.Text.Encoding.UTF8.GetString(this.ToArray())
 
-         static member inline (==) (x : String, y : String) =
-            x.Array.Count = y.Array.Count && x.StartsWith(y)
+        [<Extension>]
+        static member inline Hash(this : String) = 
+            let mutable h = 2166136261u
+            for i = 0 to this.Count - 1 do
+                h <- h ^^^ uint32(this.[i])
+                h <- h * 16777619u
+            h
+        [<Extension>]
+        static member inline Eq (x : String, y : String) =
+            x.Count = y.Count && ArrayExts.StartsWith(x,y)
 
-         member str.hash() : uint32 =
-          let mutable h = 2166136261u
-          for i = 0 to str.Count - 1 do
-            h <- h ^^^ uint32(str.[i])
-            h <- h * 16777619u
-          h
+        [<Extension>]
+        static member Wrap (v : String, pref : String, suff : String) =
+            let sum = String(v.Count + pref.Count + suff.Count)
+            sum.AddRange(pref)
+            sum.AddRange(v)
+            sum.AddRange(suff)
+            sum
 
-         override x.GetHashCode() = hash x.Array
 
-         interface System.IComparable with
-          member x.CompareTo yobj =
-              match yobj with
-              | :? String as y -> failwith "not implemented"
-              | _ -> invalidArg "yobj" "cannot compare values of different types"
+
+
 
 
