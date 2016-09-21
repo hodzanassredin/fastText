@@ -132,27 +132,28 @@ module Dictionary =
         c = 0x20uy || c = 0x09uy || c = 0x0auy || c = 0x0buy || c = 0x0cuy || c = 0x0duy
 
       static member readWordInt(inp : BinaryReader, word : String) = 
-            let c = inp.ReadByte()
-            if Dictionary.isspace(c) || c = 0uy 
-            then
-                if word.Empty() 
+            if inp.EOF() 
+            then not <| word.Empty()
+            else
+                let c = inp.ReadByte()
+                if Dictionary.isspace(c) || c = 0uy 
                 then
-                    if c = 0x0auy // \n
-                    then word.AddRange(EOS.Array)
-                         true
-                    else Dictionary.readWordInt(inp, word)
-                else
-                    if c = 0x0auy // \n
-                    then inp.Unget()
-                    true
-            else word.Add(c)
-                 Dictionary.readWordInt(inp, word)
+                    if word.Empty() 
+                    then
+                        if c = 0x0auy // \n
+                        then word.AddRange(EOS.Array)
+                             true
+                        else Dictionary.readWordInt(inp, word)
+                    else
+                        if c = 0x0auy // \n
+                        then inp.Unget()
+                        true
+                else word.Add(c)
+                     Dictionary.readWordInt(inp, word)
 
       static member inline readWord(inp : BinaryReader, word : String) = 
           word.Clear()
-          try Dictionary.readWordInt(inp, word)
-          with | :? System.IO.EndOfStreamException -> not <| word.Empty()
-          
+          Dictionary.readWordInt(inp, word)
 
       member x.readFromFile(inp : BinaryReader) =
           let word = String()
@@ -275,10 +276,11 @@ module Dictionary =
           let nlabels_ = inp.ReadInt32()
           let ntokens_ = inp.ReadInt32()
           for i = 0 to size_ - 1 do
-            let c = inp.ReadByte()
             let word = String()
+            let mutable c = inp.ReadByte()
             while c <> 0uy do
               word.Add(c)
+              c <- inp.ReadByte()
             let count = inp.ReadInt64()
             let etype : entry_type = LanguagePrimitives.EnumOfValue <| inp.ReadByte()
             words_.Add(Entry(word, count, etype, ResizeArray(), false))

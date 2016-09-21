@@ -15,31 +15,43 @@ module BaseTypes =
             if this.Count < this.Capacity
             then this.Capacity <- this.Count
 
-    type BinaryReader private (r : System.IO.BinaryReader) = 
-        let len = r.BaseStream.Length
-        let mutable pos = r.BaseStream.Position
-        new(stream) = new BinaryReader(new System.IO.BinaryReader(stream))
-        new(filename) = let stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read, 10000, FileOptions.SequentialScan)
-//                        let stream = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read)
-                        new BinaryReader(new System.IO.BinaryReader(stream))
+    type BinaryReader (s : System.IO.Stream) = 
+        let buff_size = 10000000
+        let buff : byte[] = Array.zeroCreate buff_size 
+        let len = s.Length
+        let mutable pos = s.Position
+        let mutable buff_pos = pos
+        do
+            s.Read(buff, 0, buff_size) |>ignore
+        new(filename) = let stream = System.IO.File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read)
+                        new BinaryReader(stream)
 
-        member x.ReadByte() = pos <- pos + 1L
-                              r.ReadByte()
+        member x.ReadByte() = if pos = len 
+                              then raise <| System.IO.EndOfStreamException()
+                              let i = int(pos - buff_pos)
+                              if i < buff_size then pos <- pos + 1L
+                                                    buff.[i]
+                              else s.Read(buff, 0, buff_size) |>ignore
+                                   buff_pos <- pos
+                                   pos <- pos + 1L
+                                   buff.[0]
 
-        member x.EOF() = pos = len
+        member x.EOF() = pos >= len
         member x.NotEOF() = pos < len
-
-        member x.MoveRel(l) = r.BaseStream.Position <- pos + l
-                              pos <- pos + l
-        member x.MoveAbs(l) = r.BaseStream.Position <- l
+        member x.MoveAbs(l) = s.Position <- l
                               pos <- l
-        member x.Unget() = x.MoveRel(-1L)
+                              buff_pos <- l
+                              s.Read(buff, 0, buff_size) |>ignore
+
+        member x.Unget() = assert (pos - buff_pos > 0L) 
+                           pos <- pos - 1L
+                           
         member x.Length = len
-        member x.Close() = r.Close()
-        member x.Reader() = r
+        member x.Close() = s.Close()
+        member x.Reader() = new System.IO.BinaryReader(s)
 
         interface System.IDisposable with 
-            member this.Dispose() = r.Dispose()
+            member this.Dispose() = s.Dispose()
 
     type BinaryWriter(w : System.IO.BinaryWriter) =
         new(stream) = new BinaryWriter(new System.IO.BinaryWriter(stream))

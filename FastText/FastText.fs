@@ -73,11 +73,7 @@ module FastTextM =
           let eta = int(t / progress * (1. - progress) / float(args_.thread))
           let etah = eta / 3600
           let etam = (eta - etah * 3600) / 60
-          printf "\rProgress: %.1f" (100. * progress)
-          printf "  words/sec/thread: %.0f" wst
-          printf "  lr: %.6f" lr;
-          printf "  loss: %.6f" loss
-          printf "  eta: %dh %dm" etah etam
+          printf "\rProgress: %.1f%%  words/sec/thread: %.0f  lr: %.6f  loss: %.6f  eta: %dh %dm" (100. * progress) wst lr loss etah etam
 
         member x.supervised(model : Model, 
                             lr : float,
