@@ -147,7 +147,7 @@ module FastTextM =
                 let fstK = predictions.[0].Key
                 for it in predictions do
                   if it.Key <> fstK then printf " "
-                  printf "%s" (dict_.getLabel(it.Value).ToString())
+                  printf "%s" ( dict_.getLabel(it.Value).ToStr())
                   if print_prob then printf " %A" <| exp(it.Key)
                 printfn ""
           ifs.Close()
