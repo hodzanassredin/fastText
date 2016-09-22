@@ -35,8 +35,17 @@ fi
 
 make
 
-./build/FastText.exe supervised -input "${DATADIR}/dbpedia.train" -output "${RESULTDIR}/dbpedia" -dim 10 -lr 0.1 -wordNgrams 2 -minCount 1 -bucket 10000000 -epoch 5 -thread 4
+#!/bin/bash
+if test "$OS" = "Windows_NT"
+then
+  # use .Net
+  COMMAND=./build/FastText.exe
+else
+  # use mono
+  COMMAND=mono ./build/FastText.exe
 
-./build/FastText.exe test "${RESULTDIR}/dbpedia.bin" "${DATADIR}/dbpedia.test"
+${RESULTDIR} supervised -input "${DATADIR}/dbpedia.train" -output "${RESULTDIR}/dbpedia" -dim 10 -lr 0.1 -wordNgrams 2 -minCount 1 -bucket 10000000 -epoch 5 -thread 4
 
-./build/FastText.exe predict "${RESULTDIR}/dbpedia.bin" "${DATADIR}/dbpedia.test" > "${RESULTDIR}/dbpedia.test.predict"
+${RESULTDIR} test "${RESULTDIR}/dbpedia.bin" "${DATADIR}/dbpedia.test"
+
+${RESULTDIR} predict "${RESULTDIR}/dbpedia.bin" "${DATADIR}/dbpedia.test" > "${RESULTDIR}/dbpedia.test.predict"

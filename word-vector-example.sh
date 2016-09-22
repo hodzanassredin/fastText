@@ -7,6 +7,13 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+if test "$OS" = "Windows_NT"
+then
+  # use .Net
+  COMMAND=./build/FastText.exe
+else
+  # use mono
+  COMMAND=mono ./build/FastText.exe
 
 RESULTDIR=result
 DATADIR=data
@@ -29,12 +36,12 @@ fi
 
 make
 
-./build/FastText.exe skipgram -input "${DATADIR}"/text9 -output "${RESULTDIR}"/text9 -lr 0.025 -dim 100 \
+${COMMAND} skipgram -input "${DATADIR}"/text9 -output "${RESULTDIR}"/text9 -lr 0.025 -dim 100 \
   -ws 5 -epoch 1 -minCount 5 -neg 5 -loss ns -bucket 2000000 \
   -minn 3 -maxn 6 -thread 4 -t 1e-4 -lrUpdateRate 100
 
 cut -f 1,2 "${DATADIR}"/rw/rw.txt | awk '{print tolower($0)}' | tr '\t' '\n' > "${DATADIR}"/queries.txt
 
-cat "${DATADIR}"/queries.txt | ./build/FastText.exe print-vectors "${RESULTDIR}"/text9.bin > "${RESULTDIR}"/vectors.txt
+cat "${DATADIR}"/queries.txt | ${COMMAND} print-vectors "${RESULTDIR}"/text9.bin > "${RESULTDIR}"/vectors.txt
 
 python eval.py -m "${RESULTDIR}"/vectors.txt -d "${DATADIR}"/rw/rw.txt

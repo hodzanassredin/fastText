@@ -67,12 +67,20 @@ done
 
 make
 
+if test "$OS" = "Windows_NT"
+then
+  # use .Net
+  COMMAND=./build/FastText.exe
+else
+  # use mono
+  COMMAND=mono ./build/FastText.exe
+
 for i in {0..7}
 do
   echo "Working on dataset ${DATASET[i]}"
-  ./build/FastText.exe supervised -input "${DATADIR}/${DATASET[i]}.train" \
+  ${COMMAND} supervised -input "${DATADIR}/${DATASET[i]}.train" \
     -output "${RESULTDIR}/${DATASET[i]}" -dim 10 -lr "${LR[i]}" -wordNgrams 2 \
     -minCount 1 -bucket 10000000 -epoch 5 -thread 4 > /dev/null
-  ./build/FastText.exe test "${RESULTDIR}/${DATASET[i]}.bin" \
+  ${COMMAND} test "${RESULTDIR}/${DATASET[i]}.bin" \
     "${DATADIR}/${DATASET[i]}.test"
 done
