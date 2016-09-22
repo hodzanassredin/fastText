@@ -118,7 +118,7 @@ module FastTextM =
             dict_.addNgrams(line, args_.wordNgrams);
             if (labels.Count > 0 && line.Count > 0) 
             then
-              let predictions = SortedList<float, int>()
+              let predictions = ResizeArray<KeyValuePair<float,int>>()
               model_.predict(line.ToArray(), k, predictions)
               for it in predictions do
                 if labels.Contains(it.Value) 
@@ -142,9 +142,9 @@ module FastTextM =
             if line.Count = 0 
             then printfn "n/a"
             else
-                let predictions = SortedList<float, int>()
+                let predictions = ResizeArray<KeyValuePair<float,int>>()
                 model_.predict(line.ToArray(), k, predictions)
-                let fstK = predictions.Keys.[0]
+                let fstK = predictions.[0].Key
                 for it in predictions do
                   if it.Key <> fstK then printf " "
                   printf "%s" (dict_.getLabel(it.Value).ToString())

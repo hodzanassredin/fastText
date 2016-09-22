@@ -46,6 +46,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Heap.fs" />
     <Compile Include="BaseTypes.fs" />
     <Compile Include="Args.fs" />
     <Compile Include="Utils.fs" />

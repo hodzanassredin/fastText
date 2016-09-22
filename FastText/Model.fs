@@ -100,36 +100,40 @@ module Model =
           hidden_.Mul(1.0 / float(input.Length))
 
 
-        member x.predict(input : int[], k : int, heap : SortedList<float, int>) =
+        member x.predict(input : int[], k : int, arr : ResizeArray<KeyValuePair<float,int>>) =
           assert(k > 0)
-          heap.Capacity <- k + 1
+          let heap = MinHeap(arr) 
+          heap.Reserve(k + 1);
           x.ComputeHidden(input)
-          if args.loss = Args.loss_name.hs
-          then x.dfs(k, 2 * osz_ - 2, 0.0, heap);
-          else x.findKBest(k, heap)
+          if args.loss = loss_name.hs
+          then x.dfs(k, 2 * osz_ - 2, 0.0, heap)
+          else x.findKBest(k, heap);
+          arr.Sort(fun x y -> -x.Key.CompareTo(y.Key))
 
-          //heap.Sort(fun x y -> x.Fst.CompareTo(y.Fst)) //dont need it replaced heap by sorted list
-
-        member x.findKBest(k : int, heap : SortedList<float, int>) =
-          x.ComputeOutputSoftmax()
-          for i = 0 to (osz_ - 1) do
-            if heap.Count = k && Utils.log(output_.Data.[i]) < heap.Last().Key
+        member x.findKBest(k : int, heap : MinHeap) =
+          x.ComputeOutputSoftmax();
+          for i = 0 to osz_ - 1 do
+            let l = Utils.log(output_.Data.[i])
+            if heap.Count = k && l < heap.Front().Key
             then ()
-            else heap.Add(Utils.log(output_.Data.[i]), i)
-                 if heap.Count > k 
-                 then heap.RemoveAt(0)//todo heap.RemoveAt(heap.Count-1)
+            else
+                heap.Add(KeyValuePair(l, i))
+                if heap.Count > k
+                then heap.RemoveBack()
 
-        member x.dfs(k : int, node : int, score : float,
-                              heap : SortedList<float, int>) =
-              if (heap.Count = k && score < heap.Last().Key) 
-              then ()
-              else if (tree.[node].left = -1 && tree.[node].right = -1) 
-                   then heap.Add(score, node)
-                        if (heap.Count > k) 
-                        then heap.RemoveAt(0)//todo heap.RemoveAt(heap.Count-1)
-                   else let f = Utils.sigmoid(wo.DotRow(hidden_, node - osz_))
-                        x.dfs(k, tree.[node].left, score + Utils.log(1.0 - f), heap)
-                        x.dfs(k, tree.[node].right, score + Utils.log(f), heap)
+        member x.dfs(k : int, node : int, 
+                              score : float,
+                              heap : MinHeap) =
+                  if heap.Count = k && score < heap.Front().Key 
+                  then ()
+                  else if tree.[node].left = -1 && tree.[node].right = -1
+                       then heap.Add(KeyValuePair(score, node))
+                            if heap.Count > k
+                            then heap.RemoveBack()
+                       else let f = Utils.sigmoid(wo.DotRow(hidden_, node - osz_))
+                            x.dfs(k, tree.[node].left, score + Utils.log(1.0 - f), heap)
+                            x.dfs(k, tree.[node].right, score + Utils.log(f), heap)
+
 
         member x.update(input : int[], target : int, lr : float) =
           assert(target >= 0)
