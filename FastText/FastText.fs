@@ -11,8 +11,8 @@ module FastTextM =
     type FastText(a : Args) =  
         let mutable args_ = a
         let mutable dict_ = Dictionary(args_)
-        let mutable input_ = Matrix()
-        let mutable output_ = Matrix()
+        let mutable input_ = Matrix.createNull()
+        let mutable output_ = Matrix.createNull()
         let mutable model_ = Model(input_, output_, args_, null)
         let mutable tokenCount = 0L //atomic todo
         let mutable start = Stopwatch.StartNew() // todo clock_t
@@ -30,7 +30,7 @@ module FastTextM =
           use ofs = try new System.IO.StreamWriter(args_.output + ".vec") 
                     with ex -> failwith "Error opening file for saving vectors."
           ofs.WriteLine(sprintf "%d %d" (dict_.nwords()) (args_.Dim))
-          let vec = Vector(args_.Dim)
+          let vec = createVector(args_.Dim)
           for i = 0 to dict_.nwords() - 1 do
             let word = dict_.getWord(i)
             x.getVector(vec, word)
@@ -42,8 +42,8 @@ module FastTextM =
                     with ex -> failwith "Model file cannot be opened for saving!"
           args_.save(ofs)
           dict_.save(ofs)
-          input_.save(ofs)
-          output_.save(ofs)
+          Matrix.save(input_, ofs)
+          Matrix.save(output_, ofs)
           ofs.Close()
 
         member x.loadModel(filename : string) =
@@ -51,12 +51,10 @@ module FastTextM =
                     with ex -> failwith "Model file cannot be opened for loading!"
           args_ <- Args()
           dict_ <- Dictionary(args_)
-          input_ <- Matrix()
-          output_ <- Matrix()
           args_.load(ifs)
           dict_.load(ifs)
-          input_.load(ifs)
-          output_.load(ifs)
+          input_ <- Matrix.load(ifs)
+          output_ <- Matrix.load(ifs)
           model_ <- Model(input_, output_, args_, 0)
           if args_.model = model_name.sup
           then model_.setTargetCounts(dict_.getCounts(entry_type.label).ToArray())
@@ -149,7 +147,7 @@ module FastTextM =
 
         member x.wordVectors() =
           let word = String()
-          let vec = Vector(args_.Dim)
+          let vec = createVector(args_.Dim)
           use cin = new BinaryReader(System.Console.OpenStandardInput())
           let word = String()
           while cin.NotEOF() do
@@ -163,7 +161,7 @@ module FastTextM =
         member x.textVectors() =
           let line = ResizeArray<int>()
           let labels = ResizeArray<int>()
-          let vec = Vector(args_.Dim)
+          let vec = createVector(args_.Dim)
           use cin = new BinaryReader(System.Console.OpenStandardInput())
           while cin.NotEOF() do
             dict_.getLine(cin, line, labels, model_.rng) |> ignore//todo
@@ -225,10 +223,10 @@ module FastTextM =
           dict_.readFromFile(ifs)
           ifs.Close()
 
-          input_ <- Matrix(dict_.nwords() + int(args_.bucket), args_.Dim)
+          input_ <- Matrix.create(dict_.nwords() + int(args_.bucket), args_.Dim)
           if args_.model = model_name.sup
-          then output_ <- Matrix(dict_.nlabels(), args_.Dim)
-          else output_ <- Matrix(dict_.nwords(), args_.Dim)
+          then output_ <- Matrix.create(dict_.nlabels(), args_.Dim)
+          else output_ <- Matrix.create(dict_.nwords(), args_.Dim)
           input_.Uniform(1.0 / float(args_.Dim))
           output_.Zero()
 

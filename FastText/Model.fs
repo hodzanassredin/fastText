@@ -25,13 +25,13 @@ module Model =
 
     type Model(wi : Matrix, wo : Matrix, args : Args, seed) =
         let rng_ = Random.Mcg31m1(1)
-        let grad_ = Vector(args.Dim)
-        let output_ = Vector(wo.M)
-        let hidden_ = Vector(args.Dim)
+        let grad_ = createVector(args.Dim)
+        let output_ = createVector(wo.M())
+        let hidden_ = createVector(args.Dim)
         let codes : ResizeArray<ResizeArray<bool>> = ResizeArray<ResizeArray<bool>>()
         let paths : ResizeArray<ResizeArray<int>> = ResizeArray<ResizeArray<int>>()
-        let isz_ = wi.M
-        let osz_ = wo.M
+        let isz_ = wi.M()
+        let osz_ = wo.M()
         let hsz_ = args.Dim
         let mutable negpos = 0
         let mutable loss_ = 0.0
@@ -72,25 +72,25 @@ module Model =
     
         member x.ComputeOutputSoftmax() =
           output_.Mul(wo, hidden_)
-          let mutable maxv = output_.Data.[0]
+          let mutable maxv = output_.[0]
           let mutable z = 0.0
           for i = 0 to (osz_ - 1) do
-            maxv <- max (output_.Data.[i]) maxv
+            maxv <- max (output_.[i]) maxv
           for i = 0 to (osz_ - 1) do
-            output_.Data.[i] <- exp(output_.Data.[i] - maxv)
-            z <- z + output_.Data.[i]
+            output_.[i] <- exp(output_.[i] - maxv)
+            z <- z + output_.[i]
           for i = 0 to (osz_ - 1) do
-            output_.Data.[i] <- output_.Data.[i] / z;
+            output_.[i] <- output_.[i] / z;
 
         member x.Softmax(target : int, lr : float) =
           grad_.Zero()
           x.ComputeOutputSoftmax()
           for i = 0 to (osz_ - 1) do
             let label = if i = target then 1.0 else 0.0
-            let alpha = lr * (label - output_.Data.[i])
+            let alpha = lr * (label - output_.[i])
             grad_.AddRow(wo, i, alpha)
             wo.AddRow(hidden_, i, alpha);
-          -Utils.log(output_.Data.[target]);
+          -Utils.log(output_.[target]);
 
         member x.ComputeHidden(input : int[]) =
           hidden_.Zero()
@@ -111,7 +111,7 @@ module Model =
         member x.findKBest(k : int, heap : MinHeap) =
           x.ComputeOutputSoftmax();
           for i = 0 to osz_ - 1 do
-            let l = Utils.log(output_.Data.[i])
+            let l = Utils.log(output_.[i])
             if heap.Count = k && l < heap.Front().Key
             then ()
             else
