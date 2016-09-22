@@ -7,8 +7,6 @@ module FastTextM =
     open Model
     open System.Collections.Generic
     open System.Diagnostics
-    open MathNet.Numerics.Random
-    open MathNet.Numerics.Distributions
     open System.Threading
     type FastText(a : Args) =  
         let mutable args_ = a
@@ -79,15 +77,13 @@ module FastTextM =
                             line : ResizeArray<int>,
                             labels : ResizeArray<int>) =
           if labels.Count = 0 || line.Count = 0 then ()
-          else let uniform = DiscreteUniform(0, labels.Count - 1, model.rng)
-               let i = uniform.Sample()
+          else let i = model.rng.DiscrUniformSample(0, labels.Count - 1)
                model.update(line.ToArray(), labels.[i], lr)
 
         member x.cbow(model : Model, lr : float, line : ResizeArray<int>) =
           let bow =  ResizeArray<int>()
-          let uniform = DiscreteUniform (1, args_.ws, model.rng)
           for w = 0 to line.Count - 1 do
-            let boundary = uniform.Sample()
+            let boundary = model.rng.DiscrUniformSample(1, args_.ws)
             bow.Clear()
             for c = -boundary to boundary do
               if c <> 0 && w + c >= 0 && w + c < line.Count
@@ -96,9 +92,8 @@ module FastTextM =
             model.update(bow.ToArray(), line.[w], lr)
 
         member x.skipgram(model : Model, lr : float, line : ResizeArray<int>) =
-          let uniform = DiscreteUniform(1, args_.ws,model.rng)
           for w = 0 to line.Count - 1 do
-            let boundary = uniform.Sample()
+            let boundary = model.rng.DiscrUniformSample(1, args_.ws)
             let ngrams = dict_.getNgrams(line.[w])
             for c = -boundary to boundary do
               if c <> 0 && w + c >= 0 && w + c < line.Count

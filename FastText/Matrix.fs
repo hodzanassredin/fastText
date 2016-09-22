@@ -1,7 +1,5 @@
 ﻿namespace FastText
 module Matrix =
-    open MathNet.Numerics.Random
-    open MathNet.Numerics.Distributions
     type Vector(m)=
         let data_:float[] = Array.create m 0.0
         member x.M = m
@@ -68,11 +66,10 @@ module Matrix =
             x.N <- other.N
             x.Data <- Array.copy other.Data
 
-        member x.Uniform(a : float) = //Random.doubleFill data_
-            let rng = Mcg31m1(1)
-            let uniform = ContinuousUniform(-a,a, rng)
+        member x.Uniform(a : float) = 
+            let rng = Random.Mcg31m1(1)
             for i in 0..(m * n - 1) do
-                data_.[i] <- float(uniform.Sample())
+                data_.[i] <- float(rng.ConUniformSample(-a,a))
 
         member x.AddRow(vec : Vector, i, a) =
           assert(i >= 0)

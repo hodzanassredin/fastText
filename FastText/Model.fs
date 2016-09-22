@@ -3,8 +3,6 @@ module Model =
     open Matrix
     open Args
     open System.Linq
-    open MathNet.Numerics.Random
-    open MathNet.Numerics.Distributions
     open System.Collections.Generic
     let NEGATIVE_TABLE_SIZE = 10000000
     type Node =
@@ -26,7 +24,7 @@ module Model =
        end
 
     type Model(wi : Matrix, wo : Matrix, args : Args, seed) =
-        let rng_ = Mcg31m1(1)
+        let rng_ = Random.Mcg31m1(1)
         let grad_ = Vector(args.Dim)
         let output_ = Vector(wo.M)
         let hidden_ = Vector(args.Dim)

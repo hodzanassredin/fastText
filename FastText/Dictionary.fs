@@ -1,7 +1,5 @@
 ﻿namespace FastText
 module Dictionary =
-    open MathNet.Numerics.Random
-    open MathNet.Numerics.Distributions
     open Args
     type id_type = int
     type entry_type = word=0uy | label=1uy
@@ -215,7 +213,7 @@ module Dictionary =
               h <- h * 116049371uL + uint64(line.[j])
               line.Add(nwords_ + int(h % uint64(args.bucket)))
 
-      member x.cycle(uniform : ContinuousUniform,
+      member x.cycle(uniform : Random.Mcg31m1,
                      inp : BinaryReader, 
                      words : ResizeArray<int>,
                      labels : ResizeArray<int>,
@@ -239,15 +237,14 @@ module Dictionary =
       member x.getLine(inp : BinaryReader, 
                        words : ResizeArray<int>,
                        labels : ResizeArray<int>,
-                       rng : Mcg31m1)=
-          let uniform = ContinuousUniform(0., 1., rng)
+                       rng : Random.Mcg31m1)=
           let token = String()
           words.Clear()
           labels.Clear()
           if inp.EOF() 
           then inp.MoveAbs(0L) 
 
-          x.cycle(uniform, inp, words, labels, token, 0)
+          x.cycle(rng, inp, words, labels, token, 0)
 
       member x.getLabel(lid : int) =
           assert(lid >= 0)
