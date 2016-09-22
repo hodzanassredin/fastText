@@ -109,8 +109,8 @@ module Dictionary =
                     ngram.Add(word.[j])
                     j <- j + 1
                   if n >= args.minn
-                  then let h = int(ngram.Hash()) % args.bucket //todo
-                       ngrams.Add(nwords_ + int(h))
+                  then let h : int = int(ngram.Hash() % uint32(args.bucket)) 
+                       ngrams.Add(nwords_ + h)
                   n <- n + 1
 
       member x.initNgrams() =
