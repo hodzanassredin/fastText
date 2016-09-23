@@ -44,7 +44,7 @@ module Matrix =
     type VectorExts() =
         [<Extension>]
         static member Zero(this: Vector) = 
-            Array.fill this 0 (this.Length - 1) 0.0f
+            Array.fill this 0 this.Length 0.0f
         [<Extension>]
         static member M(this: Vector) = this.Length
         [<Extension>]
