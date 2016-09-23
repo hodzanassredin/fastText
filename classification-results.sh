@@ -74,7 +74,7 @@ then
 else
   # use mono
   COMMAND=mono ./build/FastText.exe
-
+fi
 for i in {0..7}
 do
   echo "Working on dataset ${DATASET[i]}"

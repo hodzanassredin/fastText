@@ -14,7 +14,7 @@ then
 else
   # use mono
   COMMAND=mono ./build/FastText.exe
-
+fi
 RESULTDIR=result
 DATADIR=data
 
