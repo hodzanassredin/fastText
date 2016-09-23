@@ -201,8 +201,8 @@ module Dictionary =
 
       member x.getCounts(etype : entry_type) =
           let counts = ResizeArray<int64>()
-          for w in words_ do
-            if w.etype = etype then counts.Add(w.count)
+          for i = 0 to words_.Count - 1 do
+            if words_.[i].etype = etype then counts.Add(words_.[i].count)
           counts
 
       member x.addNgrams(line : ResizeArray<int>, n : int) =

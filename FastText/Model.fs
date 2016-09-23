@@ -94,7 +94,8 @@ module Model =
 
         member x.ComputeHidden(input : int[]) =
           hidden_.Zero()
-          Array.iter (fun it -> hidden_.AddRow(wi, it)) input
+          for i = 0 to input.Length - 1 do
+            hidden_.AddRow(wi, input.[i])
           hidden_.Mul(1.0 / float(input.Length))
 
 
@@ -139,7 +140,8 @@ module Model =
           if input.Length > 0 
           then
               hidden_.Zero()
-              Array.iter (fun it -> hidden_.AddRow(wi, it)) input
+              for i = 0 to input.Length - 1 do
+                hidden_.AddRow(wi, input.[i])
               hidden_.Mul(1.0 / float(input.Length))
               if args.loss = loss_name.ns
               then loss_ <- loss_ + x.NegativeSampling(target, lr)
@@ -150,7 +152,8 @@ module Model =
 
               if args.model = model_name.sup
               then grad_.Mul(1.0 / float(input.Length))
-              Array.iter (fun it -> wi.AddRow(grad_, it, 1.0)) input
+              for i = 0 to input.Length - 1 do
+                wi.AddRow(grad_, input.[i], 1.0)
 
         member x.setTargetCounts(counts : int64[]) =
               assert(counts.Length = osz_)

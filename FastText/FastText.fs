@@ -21,8 +21,8 @@ module FastTextM =
         member x.getVector(vec : Vector, word : String) =
           let ngrams = dict_.getNgrams(word)
           vec.Zero()
-          for it in ngrams do
-             vec.AddRow(input_, it)
+          for i = 0 to ngrams.Count - 1 do
+             vec.AddRow(input_, ngrams.[i])
           if ngrams.Count > 0 
           then vec.Mul(1.0 / float(ngrams.Count))
 
@@ -113,8 +113,8 @@ module FastTextM =
             then
               let predictions = ResizeArray<KeyValuePair<float,int>>()
               model_.predict(line.ToArray(), k, predictions)
-              for it in predictions do
-                if labels.Contains(it.Value) 
+              for i = 0 to predictions.Count - 1 do
+                if labels.Contains(predictions.[i].Value) 
                 then precision <- precision + 1.0
               nexamples <- nexamples + 1
               nlabels <- nlabels + labels.Count
@@ -137,11 +137,11 @@ module FastTextM =
             else
                 let predictions = ResizeArray<KeyValuePair<float,int>>()
                 model_.predict(line.ToArray(), k, predictions)
-                let fstK = predictions.[0].Key
-                for it in predictions do
-                  if it.Key <> fstK then printf " "
-                  printf "%s" ( dict_.getLabel(it.Value).ToStr())
-                  if print_prob then printf " %A" <| exp(it.Key)
+
+                for i = 0 to predictions.Count - 1 do
+                  if i > 0 then printf " "
+                  printf "%s" ( dict_.getLabel(predictions.[i].Value).ToStr())
+                  if print_prob then printf " %A" <| exp(predictions.[i].Key)
                 printfn ""
           ifs.Close()
 
@@ -167,8 +167,8 @@ module FastTextM =
             dict_.getLine(cin, line, labels, model_.rng) |> ignore//todo
             dict_.addNgrams(line, args_.wordNgrams)
             vec.Zero()
-            for it in line do
-              vec.AddRow(input_, it)
+            for i = 0 to line.Count - 1 do
+              vec.AddRow(input_, line.[i])
             if line.Count > 0
             then vec.Mul(1.0 / float(line.Count))
             printfn "%A" vec

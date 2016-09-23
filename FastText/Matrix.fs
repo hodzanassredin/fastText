@@ -12,7 +12,11 @@ module Matrix =
     let load(inp : System.IO.BinaryReader) =
           let m = int(inp.ReadInt64())
           let n = int(inp.ReadInt64())
-          Array2D.init m n (fun i j -> inp.ReadDouble())
+          let r = Array2D.zeroCreate m n
+          for i = 0 to m - 1 do
+            for j = 0 to n - 1 do 
+                r.[i,j] <- inp.ReadDouble()
+          r
 
     let save(this: Matrix, out : System.IO.BinaryWriter) =
           out.Write(int64(Array2D.length1 this))//todo int int64
@@ -31,7 +35,8 @@ module Matrix =
         static member inline M(this: Vector) = this.Length
         [<Extension>]
         static member inline Mul(this: Vector, a : float) = 
-            Array.iteri (fun i v -> this.[i] <- v * a) this
+            for i = 0 to this.Length - 1 do
+                this.[i] <- this.[i] * a
         [<Extension>]
         static member inline AddRow(this: Vector, A : Matrix, i : int) =  
             assert (i >= 0)

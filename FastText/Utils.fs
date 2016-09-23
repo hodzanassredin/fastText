@@ -28,6 +28,6 @@ module Utils =
     let sigmoid(x : float) =
         if x < float(-MAX_SIGMOID) then 0.0
         else if x > float(MAX_SIGMOID) then 1.0
-        else let i = int((x + float(MAX_SIGMOID)) * SIGMOID_TABLE_SIZEf / MAX_SIGMOIDf / 2.)
+        else let i = int((x + MAX_SIGMOIDf) * SIGMOID_TABLE_SIZEf / MAX_SIGMOIDf / 2.)
              t_sigmoid.[i] //todo
 
