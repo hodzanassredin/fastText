@@ -31,11 +31,11 @@ For the word-similarity evaluation script you will need:
 In order to build `fastText`, use the following:
 
 ```
+$ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+$ echo "deb http://download.mono-project.com/repo/debian wheezy main" | sudo tee /etc/apt/sources.list.d/mono-xamarin.list
 $ sudo apt-get update
-$ sudo apt-get install mono-complete fsharp
-$ cd /
-$ sudo mozroots --import --sync --machine --url "http://hg.mozilla.org/releases/mozilla-release/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt"
-$ cd ~
+$ sudo apt-get install mono-devel fsharp
+$ sudo cert-sync /etc/ssl/certs/ca-certificates.crt
 $ git clone https://github.com/hodzanassredin/fastText.git
 $ cd fastText
 $ chmod +x build.sh
