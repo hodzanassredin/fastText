@@ -65,7 +65,7 @@ do
   fi
 done
 
-make
+./build.sh
 
 if test "$OS" = "Windows_NT"
 then

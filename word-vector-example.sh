@@ -10,10 +10,10 @@
 if test "$OS" = "Windows_NT"
 then
   # use .Net
-  COMMAND=./build/FastText.exe
+  COMMAND="./build/FastText.exe"
 else
   # use mono
-  COMMAND=mono ./build/FastText.exe
+  COMMAND="mono ./build/FastText.exe"
 fi
 RESULTDIR=result
 DATADIR=data

@@ -35,14 +35,13 @@ fi
 
 ./build.sh
 
-#!/bin/bash
 if test "$OS" = "Windows_NT"
 then
   # use .Net
-  COMMAND=./build/FastText.exe
+  COMMAND="./build/FastText.exe"
 else
   # use mono
-  COMMAND=mono ./build/FastText.exe
+  COMMAND="mono ./build/FastText.exe"
 fi
 
 ${COMMAND} supervised -input "${DATADIR}/dbpedia.train" -output "${RESULTDIR}/dbpedia" -dim 10 -lr 0.1 -wordNgrams 2 -minCount 1 -bucket 10000000 -epoch 5 -thread 4
