@@ -29,5 +29,6 @@ module Utils =
         if x < float32(-MAX_SIGMOID) then 0.0f
         else if x > float32(MAX_SIGMOID) then 1.0f
         else let i = int((x + MAX_SIGMOIDf) * SIGMOID_TABLE_SIZEf / MAX_SIGMOIDf / 2.f)
+             assert(i >= 0 && i <= SIGMOID_TABLE_SIZE)
              t_sigmoid.[i] //todo
 
