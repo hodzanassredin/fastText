@@ -2,8 +2,8 @@
 [<AutoOpen>]
 module Heap =
     open System.Collections.Generic
-    type MinHeap(array : ResizeArray<KeyValuePair<float,int>>) = 
-        new(cap : int) = MinHeap(new ResizeArray<KeyValuePair<float,int>>(cap))
+    type MinHeap(array : ResizeArray<KeyValuePair<float32,int>>) = 
+        new(cap : int) = MinHeap(new ResizeArray<KeyValuePair<float32,int>>(cap))
         new() = MinHeap(4)
 
         member x.Add(v) = array.Add(v)
@@ -19,7 +19,7 @@ module Heap =
                 c <- parent
                 parent <- (c - 1) >>> 1
 
-        static member cycle(c, array : ResizeArray<KeyValuePair<float,int>>) = 
+        static member cycle(c, array : ResizeArray<KeyValuePair<float32,int>>) = 
                 if c < array.Count
                 then    let mutable min = c
                         if 2 * c + 1 < array.Count && array.[2 * c + 1].Key < array.[min].Key

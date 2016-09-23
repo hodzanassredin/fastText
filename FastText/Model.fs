@@ -34,24 +34,24 @@ module Model =
         let osz_ = wo.M()
         let hsz_ = args.Dim
         let mutable negpos = 0
-        let mutable loss_ = 0.0
+        let mutable loss_ = 0.0f
         let mutable nexamples_ = 1
         let tree  = ResizeArray<Node>()
         let negatives = ResizeArray<int>()
 
-        let bfloat b = if b then 1. else 0.
+        let bfloat32 b = if b then 1.f else 0.f
 
         member x.rng = rng_
-        member x.BinaryLogistic(target : int, label : bool, lr : float) =
+        member x.BinaryLogistic(target : int, label : bool, lr : float32) =
             let score = Utils.sigmoid(wo.DotRow(hidden_, target))
-            let alpha = lr * (bfloat(label) - score)
+            let alpha = lr * (bfloat32(label) - score)
             grad_.AddRow(wo, target, alpha)
             wo.AddRow(hidden_, target, alpha)
             if label then -Utils.log(score)
-            else -Utils.log(1.0 - score)
+            else -Utils.log(1.0f - score)
 
-        member x.NegativeSampling(target : int, lr : float) =
-          let mutable loss = 0.0
+        member x.NegativeSampling(target : int, lr : float32) =
+          let mutable loss = 0.0f
           grad_.Zero()
           for n = 0 to args.Neg do
             if n = 0 
@@ -61,8 +61,8 @@ module Model =
               loss <- loss + x.BinaryLogistic(x.getNegative(target), false, lr);
           loss
 
-        member x.HierarchicalSoftmax(target : int, lr : float) =
-          let mutable loss = 0.0
+        member x.HierarchicalSoftmax(target : int, lr : float32) =
+          let mutable loss = 0.0f
           grad_.Zero()
           let binaryCode = codes.[target]
           let pathToRoot = paths.[target]
@@ -73,7 +73,7 @@ module Model =
         member x.ComputeOutputSoftmax() =
           output_.Mul(wo, hidden_)
           let mutable maxv = output_.[0]
-          let mutable z = 0.0
+          let mutable z = 0.0f
           for i = 0 to (osz_ - 1) do
             maxv <- max (output_.[i]) maxv
           for i = 0 to (osz_ - 1) do
@@ -82,11 +82,11 @@ module Model =
           for i = 0 to (osz_ - 1) do
             output_.[i] <- output_.[i] / z;
 
-        member x.Softmax(target : int, lr : float) =
+        member x.Softmax(target : int, lr : float32) =
           grad_.Zero()
           x.ComputeOutputSoftmax()
           for i = 0 to (osz_ - 1) do
-            let label = if i = target then 1.0 else 0.0
+            let label = if i = target then 1.0f else 0.0f
             let alpha = lr * (label - output_.[i])
             grad_.AddRow(wo, i, alpha)
             wo.AddRow(hidden_, i, alpha);
@@ -96,16 +96,16 @@ module Model =
           hidden_.Zero()
           for i = 0 to input.Length - 1 do
             hidden_.AddRow(wi, input.[i])
-          hidden_.Mul(1.0 / float(input.Length))
+          hidden_.Mul(1.0f / float32(input.Length))
 
 
-        member x.predict(input : int[], k : int, arr : ResizeArray<KeyValuePair<float,int>>) =
+        member x.predict(input : int[], k : int, arr : ResizeArray<KeyValuePair<float32,int>>) =
           assert(k > 0)
           let heap = MinHeap(arr) 
           heap.Reserve(k + 1);
           x.ComputeHidden(input)
           if args.loss = loss_name.hs
-          then x.dfs(k, 2 * osz_ - 2, 0.0, heap)
+          then x.dfs(k, 2 * osz_ - 2, 0.0f, heap)
           else x.findKBest(k, heap);
           arr.Sort(fun x y -> -x.Key.CompareTo(y.Key))
 
@@ -121,7 +121,7 @@ module Model =
                 then heap.RemoveBack()
 
         member x.dfs(k : int, node : int, 
-                              score : float,
+                              score : float32,
                               heap : MinHeap) =
                   if heap.Count = k && score < heap.Front().Key 
                   then ()
@@ -130,11 +130,11 @@ module Model =
                             if heap.Count > k
                             then heap.RemoveBack()
                        else let f = Utils.sigmoid(wo.DotRow(hidden_, node - osz_))
-                            x.dfs(k, tree.[node].left, score + Utils.log(1.0 - f), heap)
+                            x.dfs(k, tree.[node].left, score + Utils.log(1.0f - f), heap)
                             x.dfs(k, tree.[node].right, score + Utils.log(f), heap)
 
 
-        member x.update(input : int[], target : int, lr : float) =
+        member x.update(input : int[], target : int, lr : float32) =
           assert(target >= 0)
           assert(target < osz_)
           if input.Length > 0 
@@ -142,7 +142,7 @@ module Model =
               hidden_.Zero()
               for i = 0 to input.Length - 1 do
                 hidden_.AddRow(wi, input.[i])
-              hidden_.Mul(1.0 / float(input.Length))
+              hidden_.Mul(1.0f / float32(input.Length))
               if args.loss = loss_name.ns
               then loss_ <- loss_ + x.NegativeSampling(target, lr)
               else if args.loss = loss_name.hs
@@ -151,9 +151,9 @@ module Model =
               nexamples_ <- nexamples_ + 1;
 
               if args.model = model_name.sup
-              then grad_.Mul(1.0 / float(input.Length))
+              then grad_.Mul(1.0f / float32(input.Length))
               for i = 0 to input.Length - 1 do
-                wi.AddRow(grad_, input.[i], 1.0)
+                wi.AddRow(grad_, input.[i], 1.0f)
 
         member x.setTargetCounts(counts : int64[]) =
               assert(counts.Length = osz_)
@@ -163,12 +163,12 @@ module Model =
               then x.buildTree(counts)
 
         member x.initTableNegatives(counts: int64[]) =
-              let mutable z = 0.0
+              let mutable z = 0.0f
               for i = 0 to counts.Length - 1 do
-                z <- z + double(counts.[i]) ** 0.5
+                z <- z + float32(counts.[i]) ** 0.5f
               for i = 0 to counts.Length - 1 do
-                let c = double(counts.[i]) ** 0.5
-                for j = 0 to int(c * float(NEGATIVE_TABLE_SIZE) / z) - 1 do
+                let c = float32(counts.[i]) ** 0.5f
+                for j = 0 to int(c * float32(NEGATIVE_TABLE_SIZE) / z) - 1 do
                   negatives.Add(i)
               negatives.Sort(fun x y -> rng_.Next())
 
@@ -222,5 +222,5 @@ module Model =
                 paths.Add(path)
                 codes.Add(code)
 
-        member x.getLoss() = loss_ / float(nexamples_)
+        member x.getLoss() = loss_ / float32(nexamples_)
 

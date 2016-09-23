@@ -3,7 +3,7 @@ module Args =
     type model_name = cbow=1 | sg = 2 | sup = 3
     type loss_name = hs=1 | ns = 2 | softmax = 3
     type Args()=
-        let mutable lr_ = 0.05
+        let mutable lr_ = 0.05f
         let mutable dim_ = 100
         let mutable ws_ = 5
         let mutable epoch_ = 5
@@ -17,7 +17,7 @@ module Args =
         let mutable maxn_ = 6
         let mutable thread_ = 12
         let mutable lrUpdateRate_ = 100
-        let mutable t_ = 1e-4
+        let mutable t_ = 1e-4f
         let mutable label_ = ByteString.fromString("__label__")
         let mutable verbose_ = 2
 
@@ -55,7 +55,7 @@ module Args =
             minCount_ <- 1
             minn_ <- 0
             maxn_ <- 0
-            lr_ <- 0.1
+            lr_ <- 0.1f
           else if command = "cbow"
           then model_ <- model_name.cbow
           let mutable ai = 2
@@ -77,7 +77,7 @@ module Args =
             else if argv.[ai] = "-output"
             then output_ <- argv.[ai + 1]
             else if argv.[ai] = "-lr"
-            then lr_ <- float(argv.[ai + 1]);
+            then lr_ <- float32(argv.[ai + 1]);
             else if argv.[ai] = "-lrUpdateRate" 
             then lrUpdateRate_ <- int(argv.[ai + 1]);
             else if argv.[ai] = "-dim"
@@ -113,7 +113,7 @@ module Args =
             else if argv.[ai] = "-thread"
             then thread_ <- int(argv.[ai + 1])
             else if argv.[ai] = "-t"
-            then t_ <- float(argv.[ai + 1])
+            then t_ <- float32(argv.[ai + 1])
             else if argv.[ai] = "-label"
             then label_ <- ByteString.fromString(argv.[ai + 1])
             else if argv.[ai] = "-verbose"
@@ -160,7 +160,7 @@ module Args =
           minn_ <- inp.ReadInt32()
           maxn_ <- inp.ReadInt32()
           lrUpdateRate_ <- inp.ReadInt32()
-          t_ <- inp.ReadDouble()
+          t_ <- inp.ReadSingle()
 
         member x.printHelp() = 
             printf "\n"

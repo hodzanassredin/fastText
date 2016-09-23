@@ -28,7 +28,7 @@ module Dictionary =
       let mutable nlabels_ = 0
       let mutable ntokens_ = 0
       let words_ = ResizeArray<Entry>()
-      let pdiscard_ = ResizeArray<float>()
+      let pdiscard_ = ResizeArray<float32>()
       let word2int_ = ResizeArray<int>(Array.create MAX_VOCAB_SIZE -1)
 
       member x.find(w : String) =
@@ -71,7 +71,7 @@ module Dictionary =
           else x.computeNgrams(word.Wrap(BOW,EOW), ngrams)
           ngrams
 
-      member x.discard(id : int, rand : float) =
+      member x.discard(id : int, rand : float32) =
           assert(id >= 0)
           //assert(id < nwords_) //this is incorrect in source cpp needs to be size check thresold fn
           if args.model = model_name.sup 
@@ -196,7 +196,7 @@ module Dictionary =
       member x.initTableDiscard() =
           pdiscard_.Resize(size_)
           for i = 0 to size_ - 1 do
-            let f = float(words_.[i].count) / float(ntokens_)
+            let f = float32(words_.[i].count) / float32(ntokens_)
             pdiscard_.[i] <- sqrt(args.t / f) + args.t / f
 
       member x.getCounts(etype : entry_type) =

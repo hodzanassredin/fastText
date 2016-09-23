@@ -24,7 +24,7 @@ module FastTextM =
           for i = 0 to ngrams.Count - 1 do
              vec.AddRow(input_, ngrams.[i])
           if ngrams.Count > 0 
-          then vec.Mul(1.0 / float(ngrams.Count))
+          then vec.Mul(1.0f / float32(ngrams.Count))
 
         member x.saveVectors() =
           use ofs = try new System.IO.StreamWriter(args_.output + ".vec") 
@@ -61,24 +61,24 @@ module FastTextM =
           else model_.setTargetCounts(dict_.getCounts(entry_type.word).ToArray())
           ifs.Close()
 
-        member x.printInfo(progress : float, loss : float) =
-          let t = float(start.Elapsed.TotalSeconds) 
-          let wst = float(tokenCount) / t
-          let lr = args_.lr * (1.0 - progress)
-          let eta = int(t / progress * (1. - progress) / float(args_.thread))
+        member x.printInfo(progress : float32, loss : float32) =
+          let t = float32(start.Elapsed.TotalSeconds) 
+          let wst = float32(tokenCount) / t
+          let lr = args_.lr * (1.0f - progress)
+          let eta = int(t / progress * (1.f - progress) / float32(args_.thread))
           let etah = eta / 3600
           let etam = (eta - etah * 3600) / 60
-          printf "\rProgress: %.1f%%  words/sec/thread: %.0f  lr: %.6f  loss: %.6f  eta: %dh %dm" (100. * progress) wst lr loss etah etam
+          printf "\rProgress: %.1f%%  words/sec/thread: %.0f  lr: %.6f  loss: %.6f  eta: %dh %dm" (100.f * progress) wst lr loss etah etam
 
         member x.supervised(model : Model, 
-                            lr : float,
+                            lr : float32,
                             line : ResizeArray<int>,
                             labels : ResizeArray<int>) =
           if labels.Count = 0 || line.Count = 0 then ()
           else let i = model.rng.DiscrUniformSample(0, labels.Count - 1)
                model.update(line.ToArray(), labels.[i], lr)
 
-        member x.cbow(model : Model, lr : float, line : ResizeArray<int>) =
+        member x.cbow(model : Model, lr : float32, line : ResizeArray<int>) =
           let bow =  ResizeArray<int>()
           for w = 0 to line.Count - 1 do
             let boundary = model.rng.DiscrUniformSample(1, args_.ws)
@@ -89,7 +89,7 @@ module FastTextM =
                    bow.AddRange(ngrams)
             model.update(bow.ToArray(), line.[w], lr)
 
-        member x.skipgram(model : Model, lr : float, line : ResizeArray<int>) =
+        member x.skipgram(model : Model, lr : float32, line : ResizeArray<int>) =
           for w = 0 to line.Count - 1 do
             let boundary = model.rng.DiscrUniformSample(1, args_.ws)
             let ngrams = dict_.getNgrams(line.[w])
@@ -100,7 +100,7 @@ module FastTextM =
         member x.test(filename : string, k : int) =
           let mutable nexamples = 0
           let mutable nlabels = 0
-          let mutable precision = 0.0
+          let mutable precision = 0.0f
           let line = ResizeArray<int>()
           let labels = ResizeArray<int>()
           use ifs = try new BaseTypes.BinaryReader(filename)
@@ -111,16 +111,16 @@ module FastTextM =
             dict_.addNgrams(line, args_.wordNgrams);
             if (labels.Count > 0 && line.Count > 0) 
             then
-              let predictions = ResizeArray<KeyValuePair<float,int>>()
+              let predictions = ResizeArray<KeyValuePair<float32,int>>()
               model_.predict(line.ToArray(), k, predictions)
               for i = 0 to predictions.Count - 1 do
                 if labels.Contains(predictions.[i].Value) 
-                then precision <- precision + 1.0
+                then precision <- precision + 1.0f
               nexamples <- nexamples + 1
               nlabels <- nlabels + labels.Count
           ifs.Close()
-          printfn "P@%d:%.3f" k (precision / float(k * nexamples)) 
-          printfn "R@%d:%.3f" k (precision / float(nlabels))
+          printfn "P@%d:%.3f" k (precision / float32(k * nexamples)) 
+          printfn "R@%d:%.3f" k (precision / float32(nlabels))
           printfn "Number of examples: %d" nexamples
 
         member x.predict(filename : string, k : int, print_prob : bool) =
@@ -135,7 +135,7 @@ module FastTextM =
             if line.Count = 0 
             then printfn "n/a"
             else
-                let predictions = ResizeArray<KeyValuePair<float,int>>()
+                let predictions = ResizeArray<KeyValuePair<float32,int>>()
                 model_.predict(line.ToArray(), k, predictions)
 
                 for i = 0 to predictions.Count - 1 do
@@ -170,7 +170,7 @@ module FastTextM =
             for i = 0 to line.Count - 1 do
               vec.AddRow(input_, line.[i])
             if line.Count > 0
-            then vec.Mul(1.0 / float(line.Count))
+            then vec.Mul(1.0f / float32(line.Count))
             printfn "%A" vec
 
         member x.printVectors() =
@@ -192,8 +192,8 @@ module FastTextM =
           let line = ResizeArray<int>()
           let labels = ResizeArray<int>()
           while tokenCount < int64(args_.epoch * ntokens) do
-            let progress = float(tokenCount) / float(args_.epoch * ntokens)
-            let lr = args_.lr * (1.0 - progress)
+            let progress = float32(tokenCount) / float32(args_.epoch * ntokens)
+            let lr = args_.lr * (1.0f - progress)
             localTokenCount <- localTokenCount + dict_.getLine(ifs, line, labels, model.rng)
             if args_.model = model_name.sup
             then
@@ -210,7 +210,7 @@ module FastTextM =
               if threadId = 0 && args_.verbose > 1
               then x.printInfo(progress, model.getLoss())
           if threadId = 0 
-          then x.printInfo(1.0, model.getLoss())
+          then x.printInfo(1.0f, model.getLoss())
                printfn ""
           ifs.Close()
 
@@ -227,7 +227,7 @@ module FastTextM =
           if args_.model = model_name.sup
           then output_ <- Matrix.create(dict_.nlabels(), args_.Dim)
           else output_ <- Matrix.create(dict_.nwords(), args_.Dim)
-          input_.Uniform(1.0 / float(args_.Dim))
+          input_.Uniform(1.0f / float32(args_.Dim))
           output_.Zero()
 
           start <- Stopwatch.StartNew()
