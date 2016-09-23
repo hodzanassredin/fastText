@@ -26,12 +26,12 @@ module Model =
     type Model(wi : Matrix, wo : Matrix, args : Args, seed) =
         let rng_ = Random.Mcg31m1(1)
         let grad_ = createVector(args.Dim)
-        let output_ = createVector(wo.M())
+        let output_ = createVector(wo.m)
         let hidden_ = createVector(args.Dim)
         let codes : ResizeArray<ResizeArray<bool>> = ResizeArray<ResizeArray<bool>>()
         let paths : ResizeArray<ResizeArray<int>> = ResizeArray<ResizeArray<int>>()
-        let isz_ = wi.M()
-        let osz_ = wo.M()
+        let isz_ = wi.m
+        let osz_ = wo.m
         let hsz_ = args.Dim
         let mutable negpos = 0
         let mutable loss_ = 0.0f
@@ -77,10 +77,10 @@ module Model =
           for i = 0 to (osz_ - 1) do
             maxv <- max (output_.[i]) maxv
           for i = 0 to (osz_ - 1) do
-            output_.[i] <- exp(output_.[i] - maxv)
+            output_.set(i, exp(output_.[i] - maxv))
             z <- z + output_.[i]
           for i = 0 to (osz_ - 1) do
-            output_.[i] <- output_.[i] / z;
+            output_.set(i, output_.[i] / z)
 
         member x.Softmax(target : int, lr : float32) =
           grad_.Zero()
