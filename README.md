@@ -1,10 +1,11 @@
 # fastText rewritten in fsharp
-This is one to one rewrite of original fastText library to dot net
+It is a port of original [fastText](https://github.com/facebookresearch/fastText) library to the .NET Framework. 
+
 
 * One to one rewrite (DONE)
-* Correct results and bug fixing (IN PROGRESS)
+* Correct results and bug fixing (DONE)
+* Scripts fix (DONE)
 * Tests (TODO)
-* Scripts fix (TODO)
 * Rewrite in ideomatic fsharp style (TODO)
 * Nuget package (TODO)
 
@@ -14,13 +15,8 @@ fastText is a library for efficient learning of word representations and sentenc
 
 ## Requirements
 
-**fastText** builds on modern Mac OS and Linux distributions.
-Since it uses C++11 features, it requires a compiler with good C++11 support.
-These include :
-
-* (gcc-4.6.3 or newer) or (clang-3.3 or newer)
-
-Compilation is carried out using a Makefile, so you will need to have a working **make**.
+**fastText** builds everywhere.
+It has no external dependencies.
 For the word-similarity evaluation script you will need:
 
 * python 2.6 or newer
@@ -42,7 +38,7 @@ $ chmod +x build.sh
 $ cd .paket
 $ wget https://github.com/fsprojects/Paket/releases/download/3.19.6/paket.bootstrapper.exe
 $ cd ..
-$ buid.sh
+$ ./buid.sh
 ```
 
 This will produce object files for all the classes as well as the main binary `fasttext`.
@@ -58,7 +54,7 @@ These were described in the two papers [1](#enriching-word-vectors-with-subword-
 In order to learn word vectors, as described in [1](#enriching-word-vectors-with-subword-information), do:
 
 ```
-$ ./build/FastText.exe skipgram -input data.txt -output model
+$ mono ./build/FastText.exe skipgram -input data.txt -output model
 ```
 
 where `data.txt` is a training file containing `utf-8` encoded text.
@@ -74,14 +70,14 @@ The previously trained model can be used to compute word vectors for out-of-voca
 Provided you have a text file `queries.txt` containing words for which you want to compute vectors, use the following command:
 
 ```
-$ ./build/FastText.exe print-vectors model.bin < queries.txt
+$ mono ./build/FastText.exe print-vectors model.bin < queries.txt
 ```
 
 This will output word vectors to the standard output, one vector per line.
 This can also be used with pipes:
 
 ```
-$ cat queries.txt | ./build/FastText.exe print-vectors model.bin
+$ cat queries.txt | mono ./build/FastText.exe print-vectors model.bin
 ```
 
 See the provided scripts for an example. For instance, running:
@@ -98,7 +94,7 @@ This library can also be used to train supervised text classifiers, for instance
 In order to train a text classifier using the method described in [2](#bag-of-tricks-for-efficient-text-classification), use:
 
 ```
-$ ./build/FastText.exe supervised -input train.txt -output model
+$ mono ./build/FastText.exe supervised -input train.txt -output model
 ```
 
 where `train.txt` is a text file containing a training sentence per line along with the labels.
@@ -107,7 +103,7 @@ This will output two files: `model.bin` and `model.vec`.
 Once the model was trained, you can evaluate it by computing the precision and recall at k (P@k and R@k) on a test set using:
 
 ```
-$ ./build/FastText.exe test model.bin test.txt k
+$ mono ./build/FastText.exe test model.bin test.txt k
 ```
 
 The argument `k` is optional, and is equal to `1` by default.
@@ -115,7 +111,7 @@ The argument `k` is optional, and is equal to `1` by default.
 In order to obtain the k most likely labels for a piece of text, use:
 
 ```
-$ ./build/FastText.exe predict model.bin test.txt k
+$ mono ./build/FastText.exe predict model.bin test.txt k
 ```
 
 where `test.txt` contains a piece of text to classify per line.
@@ -127,7 +123,7 @@ In order to reproduce results from the paper [2](#bag-of-tricks-for-efficient-te
 If you want to compute vector representations of sentences or paragraphs, please use:
 
 ```
-$ ./build/FastText.exe print-vectors model.bin < text.txt
+$ mono ./build/FastText.exe print-vectors model.bin < text.txt
 ```
 
 This assumes that the `text.txt` file contains the paragraphs that you want to get vectors for.
@@ -138,7 +134,7 @@ The program will output one vector representation per line in the file.
 Invoke a command without arguments to list available arguments and their default values:
 
 ```
-$ ./build/FastText.exe supervised
+$ mono ./build/FastText.exe supervised
 Empty input or output path.
 
 The following arguments are mandatory:
