@@ -34,7 +34,7 @@ then
   unzip "${DATADIR}/rw.zip" -d "${DATADIR}"
 fi
 
-make
+./build.sh
 
 ${COMMAND} skipgram -input "${DATADIR}"/text9 -output "${RESULTDIR}"/text9 -lr 0.025 -dim 100 \
   -ws 5 -epoch 1 -minCount 5 -neg 5 -loss ns -bucket 2000000 \

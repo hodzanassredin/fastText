@@ -33,7 +33,7 @@ then
   cat "${DATADIR}/dbpedia_csv/test.csv" | normalize_text > "${DATADIR}/dbpedia.test"
 fi
 
-make
+./build.sh
 
 #!/bin/bash
 if test "$OS" = "Windows_NT"
