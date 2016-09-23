@@ -236,4 +236,5 @@
       </ItemGroup>
     </When>
   </Choose>
+  <Target Name="Build" DependsOnTargets="$(BuildDependsOn)" Outputs="$(TargetPath)"/>
 </Project>
