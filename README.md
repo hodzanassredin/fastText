@@ -31,9 +31,18 @@ For the word-similarity evaluation script you will need:
 In order to build `fastText`, use the following:
 
 ```
+$ sudo apt-get update
+$ sudo apt-get install mono-complete fsharp
+$ cd /
+$ sudo mozroots --import --sync --machine --url "http://hg.mozilla.org/releases/mozilla-release/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt"
+$ cd ~
 $ git clone https://github.com/hodzanassredin/fastText.git
 $ cd fastText
-$ buid.sh or build.cmd
+$ chmod +x build.sh
+$ cd .paket
+$ wget https://github.com/fsprojects/Paket/releases/download/3.19.6/paket.bootstrapper.exe
+$ cd ..
+$ buid.sh
 ```
 
 This will produce object files for all the classes as well as the main binary `fasttext`.
