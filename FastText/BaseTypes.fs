@@ -6,12 +6,12 @@ module BaseTypes =
     [<Extension>]
     type Exts() =
         [<Extension>]
-        static member inline Resize(this: ResizeArray<'a>, size : int) = 
+        static member Resize(this: ResizeArray<'a>, size : int) = 
             if this.Count > size
             then this.RemoveRange(size, this.Count - size)
             else this.AddRange(System.Linq.Enumerable.Repeat(Unchecked.defaultof<'a>, size - this.Count))
         [<Extension>]
-        static member inline ShrinkToFit(this: ResizeArray<'a>) = 
+        static member ShrinkToFit(this: ResizeArray<'a>) = 
             if this.Count < this.Capacity
             then this.Capacity <- this.Count
 
@@ -72,11 +72,11 @@ module ByteString =
     [<Extension>]
     type ArrayExts () =
         [<Extension>]
-        static member inline Clear(this : String) = this.RemoveRange(0, this.Count)
+        static member Clear(this : String) = this.RemoveRange(0, this.Count)
         [<Extension>]
-        static member inline Copy(this : String) = ResizeArray<byte>(this.ToArray())
+        static member Copy(this : String) = ResizeArray<byte>(this.ToArray())
         [<Extension>]
-        static member inline StartsWith(this : String, sub : String) = 
+        static member StartsWith(this : String, sub : String) = 
             let mutable i = 0
             if sub.Count > this.Count 
             then false
@@ -85,18 +85,18 @@ module ByteString =
                  i = sub.Count
 
         [<Extension>]
-        static member inline ToStr(this : String) = 
+        static member ToStr(this : String) = 
             System.Text.Encoding.UTF8.GetString(this.ToArray())
 
         [<Extension>]
-        static member inline Hash(this : String) = 
+        static member Hash(this : String) = 
             let mutable h = 2166136261u
             for i = 0 to this.Count - 1 do
                 h <- h ^^^ uint32(this.[i])
                 h <- h * 16777619u
             h
         [<Extension>]
-        static member inline Eq (x : String, y : String) =
+        static member Eq (x : String, y : String) =
             x.Count = y.Count && ArrayExts.StartsWith(x,y)
 
         [<Extension>]

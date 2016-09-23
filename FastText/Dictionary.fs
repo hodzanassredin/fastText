@@ -149,7 +149,7 @@ module Dictionary =
                 else word.Add(c)
                      Dictionary.readWordInt(inp, word)
 
-      static member inline readWord(inp : BinaryReader, word : String) = 
+      static member readWord(inp : BinaryReader, word : String) = 
           word.Clear()
           Dictionary.readWordInt(inp, word)
 

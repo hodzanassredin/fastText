@@ -43,7 +43,8 @@ module Model =
 
         member x.rng = rng_
         member x.BinaryLogistic(target : int, label : bool, lr : float32) =
-            let score = Utils.sigmoid(wo.DotRow(hidden_, target))
+            let dot = wo.DotRow(hidden_, target)
+            let score = Utils.sigmoid(dot)
             let alpha = lr * (bfloat32(label) - score)
             grad_.AddRow(wo, target, alpha)
             wo.AddRow(hidden_, target, alpha)
@@ -206,10 +207,15 @@ module Model =
                 x.right <- mini.[1]
                 x.count <- tree.[mini.[0]].count + tree.[mini.[1]].count
                 tree.[i] <- x
+
                 let mutable x = tree.[mini.[0]]
                 x.parent <- i
-                x.binary <- true
                 tree.[mini.[0]] <- x
+
+                let mutable x = tree.[mini.[1]]
+                x.parent <- i
+                x.binary <- true
+                tree.[mini.[1]] <- x
 
               for i = 0 to osz_ - 1 do
                 let path = ResizeArray<int>()

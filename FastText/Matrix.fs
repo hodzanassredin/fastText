@@ -37,22 +37,22 @@ module Matrix =
             for j = 0 to this.n - 1 do 
                 out.Write(this.data.[i].[j])
 
-    let inline m(this : Matrix) = this.m
-    let inline n(this : Matrix) = this.n
+    let m(this : Matrix) = this.m
+    let n(this : Matrix) = this.n
 
     [<Extension>]
     type VectorExts() =
         [<Extension>]
-        static member inline Zero(this: Vector) = 
+        static member Zero(this: Vector) = 
             Array.fill this 0 (this.Length - 1) 0.0f
         [<Extension>]
-        static member inline M(this: Vector) = this.Length
+        static member M(this: Vector) = this.Length
         [<Extension>]
-        static member inline Mul(this: Vector, a : float32) = 
+        static member Mul(this: Vector, a : float32) = 
             for i = 0 to this.Length - 1 do
                 this.[i] <- this.[i] * a
         [<Extension>]
-        static member inline AddRow(this: Vector, A : Matrix, i : int) =  
+        static member AddRow(this: Vector, A : Matrix, i : int) =  
             assert (i >= 0)
             assert (i < m A)
             assert (this.Length = n A)
@@ -60,7 +60,7 @@ module Matrix =
             for j in 0..(n A - 1) do
                 this.[j] <- this.[j] + m.[j]
         [<Extension>]
-        static member inline AddRow(this: Vector, A : Matrix, i : int, a : float32) =  
+        static member AddRow(this: Vector, A : Matrix, i : int, a : float32) =  
             assert (i >= 0)
             assert (i < m A)
             assert (this.Length = n A)
@@ -68,7 +68,7 @@ module Matrix =
             for j in 0..(n A - 1) do
                 this.[j] <- this.[j] + a * m.[j]
         [<Extension>]
-        static member inline Mul(this: Vector, A : Matrix, vec : Vector) =
+        static member Mul(this: Vector, A : Matrix, vec : Vector) =
           assert(m A = this.Length)
           assert(n A = vec.Length)
           for i in 0..this.Length - 1 do
@@ -77,7 +77,7 @@ module Matrix =
             for j in 0..(n A - 1) do
               this.[i] <- this.[i] + m.[j] * vec.[j]
         [<Extension>]
-        static member inline Argmax(this: Vector) =
+        static member Argmax(this: Vector) =
           let mutable max = this.[0]
           let mutable argmax = 0
           for i in 0..this.Length - 1 do
@@ -86,17 +86,17 @@ module Matrix =
               argmax <- i
           argmax
         [<Extension>]
-        static member inline WriteTo(this: Vector, s:System.IO.BinaryWriter) = 
+        static member WriteTo(this: Vector, s:System.IO.BinaryWriter) = 
             Array.iter (fun (v:float32) -> s.Write(v);s.Write(Utils.spaceCode)) this
 
     [<Extension>]
     type MatrixExts() =
         [<Extension>]
-        static member inline M(this: Matrix) = this.m
+        static member M(this: Matrix) = this.m
         [<Extension>]
-        static member inline N(this: Matrix) = this.n
+        static member N(this: Matrix) = this.n
         [<Extension>]
-        static member inline Zero(this: Matrix) = 
+        static member Zero(this: Matrix) = 
             for i = 0 to m this - 1 do
                for j = 0 to n this - 1 do
                     this.data.[i].[j] <- 0.0f
@@ -106,13 +106,13 @@ module Matrix =
 //            x.N <- other.N
 //            x.Data <- Array.copy other.Data
         [<Extension>]
-        static member inline Uniform(this: Matrix, a : float32) = 
+        static member Uniform(this: Matrix, a : float32) = 
             let rng = Random.Mcg31m1(1)
             for i = 0 to m this - 1 do
                for j = 0 to n this - 1 do
                     this.data.[i].[j] <- rng.ConUniformSample(-a,a)
         [<Extension>]
-        static member inline AddRow(this: Matrix, vec : Vector, i, a) =
+        static member AddRow(this: Matrix, vec : Vector, i, a) =
           assert(i >= 0)
           assert(i < m this)
           assert(vec.Length = n this)
@@ -121,7 +121,7 @@ module Matrix =
             m.[j] <- m.[j] + a * vec.[j]
 
         [<Extension>]
-        static member inline DotRow(this: Matrix, vec : Vector, i) =
+        static member DotRow(this: Matrix, vec : Vector, i) =
           assert(i >= 0)
           assert(i < m this)
           assert(vec.Length = n this)

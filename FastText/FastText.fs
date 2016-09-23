@@ -91,6 +91,7 @@ module FastTextM =
 
         member x.skipgram(model : Model, lr : float32, line : ResizeArray<int>) =
           for w = 0 to line.Count - 1 do
+            //model.wo.data[7428][99]
             let boundary = model.rng.DiscrUniformSample(1, args_.ws)
             let ngrams = dict_.getNgrams(line.[w])
             for c = -boundary to boundary do
