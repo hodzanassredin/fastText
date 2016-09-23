@@ -19,7 +19,6 @@ module Matrix =
             n = n
         }
     let createNull() = create(0,0)
-//    let copy(other : Matrix) : Matrix = Array2D.copy other
 
     let load(inp : System.IO.BinaryReader) : Matrix =
           let m = int(inp.ReadInt64())
@@ -92,19 +91,11 @@ module Matrix =
     [<Extension>]
     type MatrixExts() =
         [<Extension>]
-        static member M(this: Matrix) = this.m
-        [<Extension>]
-        static member N(this: Matrix) = this.n
-        [<Extension>]
         static member Zero(this: Matrix) = 
             for i = 0 to m this - 1 do
                for j = 0 to n this - 1 do
                     this.data.[i].[j] <- 0.0f
 
-//        member x.Set(other : Matrix) = 
-//            x.M <- other.M
-//            x.N <- other.N
-//            x.Data <- Array.copy other.Data
         [<Extension>]
         static member Uniform(this: Matrix, a : float32) = 
             let rng = Random.Mcg31m1(1)
