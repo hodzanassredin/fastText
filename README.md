@@ -2,8 +2,9 @@
 It is a port of original [fastText](https://github.com/facebookresearch/fastText) library to the .NET Framework. 
 
 
-This repository is on hold just to keep fsharp version as close to original as possible.
-Main work moved to [this](https://github.com/hodzanassredin/NFastText) repository.
+**This repository is on hold just to keep fsharp version as close to original as possible.**
+
+**Main work moved to [this](https://github.com/hodzanassredin/NFastText) repository.**
 
 # fastText
 
